@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:handycraft_app/core/providers/pelanggan_provider.dart';
+import 'package:handycraft_app/screens/pelanggan/pelanggan_detail_screen.dart';
 import 'package:iconsax/iconsax.dart';
 
 class PelangganScreen extends ConsumerWidget {
@@ -8,7 +9,7 @@ class PelangganScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final PelanggansAsync = ref.watch(PelangganListProvider);
+    final pelanggansAsync = ref.watch(pelangganListProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -17,16 +18,17 @@ class PelangganScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Iconsax.add),
             onPressed: () {
+              // Add new pelanggan
             },
           ),
         ],
       ),
-      body: PelanggansAsync.when(
+      body: pelanggansAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text('Error: $err')),
-        data: (Pelanggans) => ListView.builder(
+        data: (pelanggans) => ListView.builder(
           padding: const EdgeInsets.all(16),
-          itemCount: Pelanggans.length,
+          itemCount: pelanggans.length,
           itemBuilder: (_, index) => Card(
             elevation: 2,
             margin: const EdgeInsets.only(bottom: 12),
@@ -42,10 +44,18 @@ class PelangganScreen extends ConsumerWidget {
                 ),
                 child: const Icon(Iconsax.profile_2user, color: Colors.purple),
               ),
-              title: Text(Pelanggans[index].name),
-              subtitle: Text(Pelanggans[index].phone),
+              title: Text(pelanggans[index].name),
+              subtitle: Text(pelanggans[index].phone),
               trailing: const Icon(Iconsax.arrow_right_3),
               onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PelangganDetailScreen(
+                      pelanggan: pelanggans[index],
+                    ),
+                  ),
+                );
               },
             ),
           ),

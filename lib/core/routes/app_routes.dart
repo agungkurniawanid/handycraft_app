@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:handycraft_app/core/models/pelanggan_model.dart';
 import 'package:handycraft_app/core/models/supplier_model.dart';
 import 'package:handycraft_app/screens/karyawan/karyawan_screen.dart';
+import 'package:handycraft_app/screens/pelanggan/pelanggan_detail_screen.dart';
 import 'package:handycraft_app/screens/pelanggan/pelanggan_screen.dart';
 import 'package:handycraft_app/screens/supplier/supplier_detail_screen.dart';
 import 'package:handycraft_app/screens/supplier/supplier_screen.dart';
@@ -13,6 +15,7 @@ class AppRoutes {
   static const String supplier = '/supplier';
   static const String supplierDetail = '/supplier/detail';
   static const String pelanggan = '/pelanggan';
+  static const String pelangganDetail = '/pelanggan/detail';
   static const String karyawan = '/karyawan';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -31,6 +34,11 @@ class AppRoutes {
         final supplier = settings.arguments as Supplier;
         return MaterialPageRoute(
           builder: (_) => SupplierDetailScreen(supplier: supplier),
+        );
+      case pelangganDetail:
+        final pelanggan = settings.arguments as Pelanggan;
+        return MaterialPageRoute(
+          builder: (_) => PelangganDetailScreen(pelanggan: pelanggan),
         );
       default:
         return MaterialPageRoute(

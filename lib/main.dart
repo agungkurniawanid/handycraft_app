@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:handycraft_app/core/constants/app_constant.dart';
 import 'package:handycraft_app/core/providers/theme_provider.dart';
 import 'package:handycraft_app/core/routes/app_routes.dart';
-import 'package:handycraft_app/screens/dashboard/dashboard_screen.dart';
+import 'package:handycraft_app/screens/splash_screen.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -48,11 +48,12 @@ class MyApp extends ConsumerWidget {
     final theme = ref.watch(themeProvider);
 
     return MaterialApp(
+      key: ValueKey(theme.hashCode),
       debugShowCheckedModeBanner: false,
       title: AppConstants.appName,
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      home: const DashboardScreen(),
+      home: const SplashScreen(),
       onGenerateRoute: AppRoutes.generateRoute,
       builder: (context, child) {
         return Consumer(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 
 class AddBahanScreen extends StatefulWidget {
   const AddBahanScreen({super.key});
@@ -24,8 +25,15 @@ class _AddBahanScreenState extends State<AddBahanScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Tambah Bahan Baku'), centerTitle: true),
-      body: Padding(
+      appBar: AppBar(
+        title: const Text('Tambah Bahan Baku'),
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Iconsax.arrow_left_2),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -36,6 +44,7 @@ class _AddBahanScreenState extends State<AddBahanScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Nama Bahan Baku',
                   border: OutlineInputBorder(),
+                  prefixIcon: Icon(Iconsax.box),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -50,6 +59,7 @@ class _AddBahanScreenState extends State<AddBahanScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Harga Beli Satuan',
                   border: OutlineInputBorder(),
+                  prefixIcon: Icon(Iconsax.money),
                   prefixText: 'Rp ',
                 ),
                 keyboardType: TextInputType.number,
@@ -69,6 +79,7 @@ class _AddBahanScreenState extends State<AddBahanScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Satuan (kg, pcs, liter, etc)',
                   border: OutlineInputBorder(),
+                  prefixIcon: Icon(Iconsax.weight),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -80,19 +91,32 @@ class _AddBahanScreenState extends State<AddBahanScreen> {
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
+                height: 50,
                 child: ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
+                      // TODO: Implement save functionality
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Data bahan baku berhasil disimpan'),
+                        ),
+                      );
                       Navigator.pop(context);
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text('Simpan Data'),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Iconsax.save_2, size: 20),
+                      SizedBox(width: 8),
+                      Text('Simpan Data'),
+                    ],
+                  ),
                 ),
               ),
             ],

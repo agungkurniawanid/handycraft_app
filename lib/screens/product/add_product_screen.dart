@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({super.key});
@@ -27,8 +28,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
       appBar: AppBar(
         title: const Text('Tambah Produk/Jasa'),
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Iconsax.arrow_left_2),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -39,6 +44,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Nama Produk/Jasa',
                   border: OutlineInputBorder(),
+                  prefixIcon: Icon(Iconsax.shop),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -53,6 +59,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Harga Jual',
                   border: OutlineInputBorder(),
+                  prefixIcon: Icon(Iconsax.money),
                   prefixText: 'Rp ',
                 ),
                 keyboardType: TextInputType.number,
@@ -72,6 +79,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Satuan (pcs, kg, etc)',
                   border: OutlineInputBorder(),
+                  prefixIcon: Icon(Iconsax.weight),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -83,20 +91,33 @@ class _AddProductScreenState extends State<AddProductScreen> {
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
+                height: 50,
                 child: ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
+                      // TODO: Implement save functionality
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Data produk berhasil disimpan'),
+                        ),
+                      );
                       Navigator.pop(context);
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Iconsax.save_2, size: 20),
+                      SizedBox(width: 8),
+                      Text('Simpan Data'),
+                    ],
                   ),
                 ),
-                  child: const Text('Simpan Data'),
-              ),
               ),
             ],
           ),

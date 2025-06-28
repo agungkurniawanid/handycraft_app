@@ -30,6 +30,10 @@ class _AddSupplierScreenState extends State<AddSupplierScreen> {
       appBar: AppBar(
         title: const Text('Tambah Supplier Baru'),
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Iconsax.arrow_left_2),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -114,7 +118,14 @@ class _AddSupplierScreenState extends State<AddSupplierScreen> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text('Simpan Supplier'),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Iconsax.save_2, size: 20),
+                      SizedBox(width: 8),
+                      Text('Simpan Supplier'),
+                    ],
+                  ),
                 ),
               ),
             ],

@@ -48,7 +48,6 @@ class MyApp extends ConsumerWidget {
     final theme = ref.watch(themeProvider);
 
     return MaterialApp(
-      key: ValueKey(theme.hashCode),
       debugShowCheckedModeBanner: false,
       title: AppConstants.appName,
       theme: ThemeData.light(),

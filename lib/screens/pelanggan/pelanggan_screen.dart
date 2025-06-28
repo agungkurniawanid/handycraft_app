@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:handycraft_app/core/providers/pelanggan_provider.dart';
+import 'package:handycraft_app/screens/pelanggan/add_pelanggan_screen.dart';
 import 'package:handycraft_app/screens/pelanggan/pelanggan_detail_screen.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -18,7 +19,12 @@ class PelangganScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Iconsax.add),
             onPressed: () {
-              // Add new pelanggan
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AddPelangganScreen(),
+                ),
+              );
             },
           ),
         ],

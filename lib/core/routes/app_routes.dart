@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:handycraft_app/core/models/pelanggan_model.dart';
 import 'package:handycraft_app/core/models/supplier_model.dart';
 import 'package:handycraft_app/screens/karyawan/karyawan_screen.dart';
+import 'package:handycraft_app/screens/pelanggan/add_pelanggan_screen.dart';
 import 'package:handycraft_app/screens/pelanggan/pelanggan_detail_screen.dart';
 import 'package:handycraft_app/screens/pelanggan/pelanggan_screen.dart';
 import 'package:handycraft_app/screens/product/add_bahan_screen.dart';
@@ -21,6 +22,7 @@ class AppRoutes {
   static const String addSupplier = '/supplier/add';
   static const String supplierDetail = '/supplier/detail';
   static const String pelanggan = '/pelanggan';
+  static const String addPelanggan = '/pelanggan/add';
   static const String pelangganDetail = '/pelanggan/detail';
   static const String karyawan = '/karyawan';
 
@@ -36,10 +38,12 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const AddProductScreen());
       case supplier:
         return MaterialPageRoute(builder: (_) => const SupplierScreen());
-      case addSupplier: // Add this case
+      case addSupplier:
         return MaterialPageRoute(builder: (_) => const AddSupplierScreen());
       case pelanggan:
         return MaterialPageRoute(builder: (_) => const PelangganScreen());
+      case addPelanggan:
+        return MaterialPageRoute(builder: (_) => const AddPelangganScreen());
       case karyawan:
         return MaterialPageRoute(builder: (_) => const KaryawanScreen());
       case supplierDetail:

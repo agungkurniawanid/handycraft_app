@@ -7,6 +7,7 @@ import 'package:handycraft_app/screens/pelanggan/pelanggan_screen.dart';
 import 'package:handycraft_app/screens/product/add_bahan_screen.dart';
 import 'package:handycraft_app/screens/product/add_product_screen.dart';
 import 'package:handycraft_app/screens/product/product_screen.dart';
+import 'package:handycraft_app/screens/supplier/add_supplier_screen.dart';
 import 'package:handycraft_app/screens/supplier/supplier_detail_screen.dart';
 import 'package:handycraft_app/screens/supplier/supplier_screen.dart';
 import 'package:handycraft_app/widgets/navbottom.dart';
@@ -17,6 +18,7 @@ class AppRoutes {
   static const String addBahan = '/product/add-bahan';
   static const String addProduct = '/product/add-product';
   static const String supplier = '/supplier';
+  static const String addSupplier = '/supplier/add';
   static const String supplierDetail = '/supplier/detail';
   static const String pelanggan = '/pelanggan';
   static const String pelangganDetail = '/pelanggan/detail';
@@ -34,6 +36,8 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const AddProductScreen());
       case supplier:
         return MaterialPageRoute(builder: (_) => const SupplierScreen());
+      case addSupplier: // Add this case
+        return MaterialPageRoute(builder: (_) => const AddSupplierScreen());
       case pelanggan:
         return MaterialPageRoute(builder: (_) => const PelangganScreen());
       case karyawan:

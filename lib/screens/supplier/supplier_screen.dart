@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:handycraft_app/core/providers/supplier_provider.dart';
+import 'package:handycraft_app/screens/supplier/add_supplier_screen.dart'; // Add this import
 import 'package:handycraft_app/screens/supplier/supplier_detail_screen.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -18,7 +19,10 @@ class SupplierScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Iconsax.add),
             onPressed: () {
-              // Add new supplier
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AddSupplierScreen()),
+              );
             },
           ),
         ],

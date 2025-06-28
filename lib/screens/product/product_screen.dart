@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:handycraft_app/core/models/product_model.dart';
 import 'package:handycraft_app/core/providers/product_provider.dart';
+import 'package:handycraft_app/screens/product/add_bahan_screen.dart';
+import 'package:handycraft_app/screens/product/add_product_screen.dart';
 import 'package:iconsax/iconsax.dart';
 
 class ProductScreen extends ConsumerWidget {
@@ -27,7 +29,10 @@ class ProductScreen extends ConsumerWidget {
               context,
               title: 'Data Bahan Baku',
               onAddPressed: () {
-                // Add new material
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AddBahanScreen()),
+                );
               },
             ),
             const SizedBox(height: 12),
@@ -39,7 +44,10 @@ class ProductScreen extends ConsumerWidget {
               context,
               title: 'Data Produk/Jasa',
               onAddPressed: () {
-                // Add new product
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AddProductScreen()),
+                );
               },
             ),
             const SizedBox(height: 12),

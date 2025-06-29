@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:handycraft_app/core/models/pelanggan_model.dart';
 import 'package:handycraft_app/core/models/supplier_model.dart';
 import 'package:handycraft_app/screens/karyawan/karyawan_screen.dart';
+import 'package:handycraft_app/screens/karyawan/add_karyawan_screen.dart';
+import 'package:handycraft_app/screens/karyawan/add_honor_screen.dart';
 import 'package:handycraft_app/screens/pelanggan/add_pelanggan_screen.dart';
 import 'package:handycraft_app/screens/pelanggan/pelanggan_detail_screen.dart';
 import 'package:handycraft_app/screens/pelanggan/pelanggan_screen.dart';
@@ -25,6 +27,8 @@ class AppRoutes {
   static const String addPelanggan = '/pelanggan/add';
   static const String pelangganDetail = '/pelanggan/detail';
   static const String karyawan = '/karyawan';
+  static const String addKaryawan = '/karyawan/add';
+  static const String addHonor = '/karyawan/add-honor';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -46,6 +50,10 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const AddPelangganScreen());
       case karyawan:
         return MaterialPageRoute(builder: (_) => const KaryawanScreen());
+      case addKaryawan:
+        return MaterialPageRoute(builder: (_) => const AddKaryawanScreen());
+      case addHonor:
+        return MaterialPageRoute(builder: (_) => const AddHonorScreen());
       case supplierDetail:
         final supplier = settings.arguments as Supplier;
         return MaterialPageRoute(

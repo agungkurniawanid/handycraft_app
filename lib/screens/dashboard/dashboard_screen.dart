@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:handycraft_app/core/providers/theme_provider.dart';
-// import 'package:handycraft_app/core/routes/app_routes.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:handycraft_app/screens/dashboard/add_penerimaan_screen.dart';
+import 'package:handycraft_app/screens/dashboard/add_pengeluaran_screen.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -40,31 +41,16 @@ class _DashboardState extends ConsumerState<DashboardScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Summary Card (Income & Expense)
             _buildSummaryCard(context),
+            const SizedBox(height: 16),
+            _buildActionButtons(context),
             const SizedBox(height: 20),
-
-            // Profit/Loss Card
             _buildProfitCard(context),
             const SizedBox(height: 20),
-
-            // Quick Actions
-            _buildQuickActions(context),
-            const SizedBox(height: 20),
-
-            // Recent Transactions
             _buildRecentTransactions(context),
           ],
         ),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //     // Add new transaction
-      //     Navigator.pushNamed(context, AppRoutes.product);
-      //   },
-      //   backgroundColor: theme.colorScheme.primary,
-      //   child: const Icon(Iconsax.add, color: Colors.white),
-      // ),
     );
   }
 
@@ -91,11 +77,9 @@ class _DashboardState extends ConsumerState<DashboardScreen> {
               ],
             ),
             const SizedBox(height: 20),
-
-            // Income & Expense Row
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                // Income
                 Expanded(
                   child: _buildFinancialItem(
                     context,
@@ -105,16 +89,12 @@ class _DashboardState extends ConsumerState<DashboardScreen> {
                     color: Colors.green,
                   ),
                 ),
-
-                // Vertical Divider
                 Container(
                   height: 60,
-                  width: 1,
+                  width: 1.2,
                   color: theme.dividerColor,
                   margin: const EdgeInsets.symmetric(horizontal: 8),
                 ),
-
-                // Expense
                 Expanded(
                   child: _buildFinancialItem(
                     context,
@@ -128,6 +108,84 @@ class _DashboardState extends ConsumerState<DashboardScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: _buildSimpleActionButton(
+            context,
+            icon: Iconsax.add,
+            label: 'Tambah Penerimaan',
+            color: Colors.green,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _buildSimpleActionButton(
+            context,
+            icon: Iconsax.add,
+            label: 'Tambah Pengeluaran',
+            color: Colors.red,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSimpleActionButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color color,
+  }) {
+    final theme = Theme.of(context);
+
+    return ElevatedButton(
+      onPressed: () {
+        if (label == 'Tambah Penerimaan') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AddPenerimaanScreen(),
+            ),
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AddPengeluaranScreen(),
+            ),
+          );
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color.withOpacity(0.1),
+        foregroundColor: color,
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: color.withOpacity(0.3)),
+        ),
+        elevation: 0,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(icon, size: 20),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -196,7 +254,6 @@ class _DashboardState extends ConsumerState<DashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header with icon
               Row(
                 children: [
                   Container(
@@ -220,8 +277,6 @@ class _DashboardState extends ConsumerState<DashboardScreen> {
                 ],
               ),
               const SizedBox(height: 20),
-
-              // Amount with percentage
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -265,8 +320,6 @@ class _DashboardState extends ConsumerState<DashboardScreen> {
                 ],
               ),
               const SizedBox(height: 12),
-
-              // Status label
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -285,75 +338,6 @@ class _DashboardState extends ConsumerState<DashboardScreen> {
                 ),
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuickActions(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Aksi Cepat',
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildQuickActionButton(
-              context,
-              icon: Iconsax.user_octagon,
-              label: 'Data Supplier',
-              color: Colors.blue,
-            ),
-            _buildQuickActionButton(
-              context,
-              icon: Iconsax.receipt_search,
-              label: 'Data Karwayam',
-              color: Colors.purple,
-            ),
-            _buildQuickActionButton(
-              context,
-              icon: Iconsax.box,
-              label: 'Data Produk',
-              color: Colors.orange,
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuickActionButton(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required Color color,
-  }) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: ElevatedButton.icon(
-          icon: Icon(icon, size: 20),
-          label: Text(label, style: const TextStyle(fontSize: 12)),
-          onPressed: () {
-            // Add functionality
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: color.withOpacity(0.1),
-            foregroundColor: color,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            elevation: 0,
           ),
         ),
       ),
@@ -403,7 +387,7 @@ class _DashboardState extends ConsumerState<DashboardScreen> {
             ),
             TextButton(
               onPressed: () {
-                // Navigate to all transactions
+                // Navigasi ke semua transaksi
               },
               child: const Text('Lihat Semua'),
             ),
@@ -448,7 +432,7 @@ class _DashboardState extends ConsumerState<DashboardScreen> {
                     ),
                   ),
                   onTap: () {
-                    // View transaction details
+                    // Melihat detail transaksi
                   },
                 );
               }).toList(),

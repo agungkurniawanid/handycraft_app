@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:handycraft_app/core/models/karyawan_model.dart';
 import 'package:handycraft_app/core/providers/karyawan_provider.dart';
-import 'package:handycraft_app/core/routes/app_routes.dart' show AppRoutes;
 import 'package:handycraft_app/screens/karyawan/add_honor_screen.dart';
 import 'package:handycraft_app/screens/karyawan/add_karyawan_screen.dart';
 import 'package:handycraft_app/screens/karyawan/karyawan_detail_screen.dart';

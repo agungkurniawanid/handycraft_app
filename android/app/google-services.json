@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "902531271733",
+    "project_id": "projecthandycraft-916a7",
+    "storage_bucket": "projecthandycraft-916a7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:902531271733:android:daf153ae720436e7e7f57c",
+        "android_client_info": {
+          "package_name": "com.example.handycraft_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVvRS6QdkImVHvJPDiB0DBi4tcYUj1KHk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

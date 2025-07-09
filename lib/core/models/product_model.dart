@@ -1,3 +1,5 @@
+import 'package:firebase_database/firebase_database.dart';
+
 class Product {
   final String id;
   final String name;
@@ -11,13 +13,23 @@ class Product {
     this.unit = 'pcs',
   });
 
-  factory Product.fromJson(Map<String, dynamic> json) {
+  factory Product.fromSnapshot(DataSnapshot snapshot) {
+    final data = snapshot.value as Map<dynamic, dynamic>;
     return Product(
-      id: json['id'],
-      name: json['name'],
-      price: json['price'].toDouble(),
-      unit: json['unit'] ?? 'pcs',
+      id: snapshot.key ?? '',
+      name: data['name'] as String,
+      price: (data['price'] as num).toDouble(),
+      unit: data['unit'] as String? ?? 'pcs',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'price': price,
+      'unit': unit,
+    };
   }
 }
 
@@ -34,12 +46,23 @@ class RawMaterialModel {
     required this.unit,
   });
 
-  factory RawMaterialModel.fromJson(Map<String, dynamic> json) {
+  // Factory untuk membuat objek dari DataSnapshot Firebase
+  factory RawMaterialModel.fromSnapshot(DataSnapshot snapshot) {
+    final data = snapshot.value as Map<dynamic, dynamic>;
     return RawMaterialModel(
-      id: json['id'],
-      name: json['name'],
-      price: json['price'].toDouble(),
-      unit: json['unit'],
+      id: snapshot.key ?? '',
+      name: data['name'] as String,
+      price: (data['price'] as num).toDouble(),
+      unit: data['unit'] as String,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'price': price,
+      'unit': unit,
+    };
   }
 }

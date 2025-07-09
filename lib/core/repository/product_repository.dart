@@ -29,6 +29,14 @@ class ProductRepository {
     await _dbRef.child('master_data/bahan_baku').child(materialId).remove();
   }
 
+  Future<void> updateProduct(Product product) async {
+    await _dbRef.child('master_data/produk').child(product.id).update(product.toJson());
+  }
+
+  Future<void> updateRawMaterial(RawMaterialModel material) async {
+    await _dbRef.child('master_data/bahan_baku').child(material.id).update(material.toJson());
+  }
+
   Stream<List<Product>> getProductsStream() {
     final query = _dbRef.child('master_data/produk');
     return query.onValue.map((event) {

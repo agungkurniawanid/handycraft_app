@@ -7,6 +7,8 @@ import 'package:handycraft_app/screens/product/add_product_screen.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 
+import 'edit_product_screen.dart';
+
 class ProductScreen extends ConsumerWidget {
   const ProductScreen({super.key});
 
@@ -56,9 +58,7 @@ class ProductScreen extends ConsumerWidget {
           actions: <Widget>[
             TextButton(
               child: const Text('Batal'),
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-              },
+              onPressed: () => Navigator.of(dialogContext).pop(),
             ),
             TextButton(
               style: TextButton.styleFrom(foregroundColor: Colors.red),
@@ -73,6 +73,30 @@ class ProductScreen extends ConsumerWidget {
       },
     );
   }
+
+  Widget _buildOptionsMenu(BuildContext context, {required VoidCallback onEdit, required VoidCallback onDelete}) {
+    return PopupMenuButton<String>(
+      icon: const Icon(Iconsax.more),
+      onSelected: (value) {
+        if (value == 'edit') {
+          onEdit();
+        } else if (value == 'delete') {
+          onDelete();
+        }
+      },
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+        const PopupMenuItem<String>(
+          value: 'edit',
+          child: ListTile(leading: Icon(Iconsax.edit), title: Text('Edit')),
+        ),
+        const PopupMenuItem<String>(
+          value: 'delete',
+          child: ListTile(leading: Icon(Iconsax.trash, color: Colors.red), title: Text('Hapus', style: TextStyle(color: Colors.red))),
+        ),
+      ],
+    );
+  }
+
 
   Widget _buildSectionHeader(BuildContext context, {required String title, required VoidCallback onAddPressed}) {
     return Row(
@@ -129,9 +153,15 @@ class ProductScreen extends ConsumerWidget {
                 ],
               ),
             ),
-            IconButton(
-              icon: Icon(Iconsax.trash, color: Colors.red.shade400),
-              onPressed: () {
+            _buildOptionsMenu(
+              context,
+              onEdit: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => EditItemScreen(item: material, type: ItemType.rawMaterial)),
+                );
+              },
+              onDelete: () {
                 _showDeleteConfirmationDialog(
                   context,
                   title: 'Hapus Bahan Baku',
@@ -191,9 +221,15 @@ class ProductScreen extends ConsumerWidget {
                 ],
               ),
             ),
-            IconButton(
-              icon: Icon(Iconsax.trash, color: Colors.red.shade400),
-              onPressed: () {
+            _buildOptionsMenu(
+              context,
+              onEdit: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => EditItemScreen(item: product, type: ItemType.product)),
+                );
+              },
+              onDelete: () {
                 _showDeleteConfirmationDialog(
                   context,
                   title: 'Hapus Produk',

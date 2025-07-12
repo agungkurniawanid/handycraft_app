@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:handycraft_app/core/models/karyawan_model.dart';
 import 'package:handycraft_app/core/providers/karyawan_provider.dart';
+import 'package:handycraft_app/screens/karyawan/add_karyawan_screen.dart';
 import 'package:iconsax/iconsax.dart';
 
 class KaryawanDetailScreen extends ConsumerWidget {
@@ -11,8 +12,6 @@ class KaryawanDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final honorsAsync = ref.watch(honorListProvider);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(karyawan.name),
@@ -20,7 +19,52 @@ class KaryawanDetailScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Iconsax.edit),
             onPressed: () {
-              // Edit karyawan
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddKaryawanScreen(karyawan: karyawan),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Iconsax.trash),
+            onPressed: () async {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Hapus Karyawan'),
+                  content: const Text(
+                      'Apakah Anda yakin ingin menghapus karyawan ini?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('Batal'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text('Hapus',
+                          style: TextStyle(color: Colors.red)),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirmed == true) {
+                try {
+                  final repository = ref.read(karyawanRepositoryProvider);
+                  await repository.deleteKaryawan(karyawan.id);
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: $e')),
+                    );
+                  }
+                }
+              }
             },
           ),
         ],
@@ -30,7 +74,6 @@ class KaryawanDetailScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with icon
             Center(
               child: Container(
                 padding: const EdgeInsets.all(16),
@@ -46,8 +89,6 @@ class KaryawanDetailScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 24),
-
-            // Karyawan Information
             Card(
               elevation: 2,
               shape: RoundedRectangleBorder(
@@ -84,42 +125,9 @@ class KaryawanDetailScreen extends ConsumerWidget {
                       label: 'Status',
                       value: karyawan.status,
                     ),
-                    const Divider(),
-                    _buildDetailItem(
-                      context,
-                      icon: Iconsax.briefcase,
-                      label: 'Posisi',
-                      value: karyawan.position,
-                    ),
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
-
-            // Daftar Honor Section
-            Text(
-              'Daftar Honor',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 12),
-            honorsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, _) => Center(child: Text('Error: $err')),
-              data: (honors) {
-                final karyawanHonors = honors.where(
-                  (h) => h.karyawanId == karyawan.id).toList();
-                
-                if (karyawanHonors.isEmpty) {
-                  return const Center(child: Text('Tidak ada data honor'));
-                }
-
-                return Column(
-                  children: karyawanHonors.map((honor) => _buildHonorCard(honor)).toList(),
-                );
-              },
             ),
           ],
         ),
@@ -159,70 +167,6 @@ class KaryawanDetailScreen extends ConsumerWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildHonorCard(Honor honor) {
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Iconsax.money, size: 20, color: Colors.orange),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  honor.jenisPekerjaan,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Status: ${honor.statusKaryawan}',
-                  style: TextStyle(color: Colors.grey.shade600),
-                ),
-                Text(
-                  'Satuan: ${honor.satuan}',
-                  style: TextStyle(color: Colors.grey.shade600),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Gaji: Rp${honor.gaji.toStringAsFixed(0).replaceAllMapped(
-                    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                    (match) => '${match[1]}.',
-                  )}',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.green,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

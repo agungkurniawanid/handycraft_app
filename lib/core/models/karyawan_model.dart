@@ -1,57 +1,56 @@
+import 'package:firebase_database/firebase_database.dart';
+
 class Karyawan {
   final String id;
   final String name;
   final String phone;
   final String address;
   final String status;
-  final String position;
 
-  const Karyawan({
+  Karyawan({
     required this.id,
     required this.name,
     required this.phone,
     required this.address,
     required this.status,
-    required this.position,
   });
 
-  factory Karyawan.fromJson(Map<String, dynamic> json) {
+  factory Karyawan.fromSnapshot(DataSnapshot snapshot) {
+    final data = snapshot.value as Map<dynamic, dynamic>;
     return Karyawan(
-      id: json['id'],
-      name: json['name'],
-      phone: json['phone'],
-      address: json['address'],
-      status: json['status'],
-      position: json['position'],
+      id: snapshot.key ?? '',
+      name: data['name'] as String,
+      phone: data['phone'] as String,
+      address: data['address'] as String,
+      status: data['status'] as String,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'phone': phone,
+      'address': address,
+      'status': status,
+    };
   }
 }
 
-class Honor {
-  final String id;
-  final String karyawanId;
-  final String jenisPekerjaan;
-  final double gaji;
-  final String satuan;
-  final String statusKaryawan;
-
-  const Honor({
-    required this.id,
-    required this.karyawanId,
-    required this.jenisPekerjaan,
-    required this.gaji,
-    required this.satuan,
-    required this.statusKaryawan,
-  });
-
-  factory Honor.fromJson(Map<String, dynamic> json) {
-    return Honor(
-      id: json['id'],
-      karyawanId: json['karyawanId'],
-      jenisPekerjaan: json['jenisPekerjaan'],
-      gaji: json['gaji'].toDouble(),
-      satuan: json['satuan'],
-      statusKaryawan: json['statusKaryawan'],
+extension KaryawanExtension on Karyawan {
+  Karyawan copyWith({
+    String? id,
+    String? name,
+    String? phone,
+    String? address,
+    String? status,
+  }) {
+    return Karyawan(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      phone: phone ?? this.phone,
+      address: address ?? this.address,
+      status: status ?? this.status,
     );
   }
 }

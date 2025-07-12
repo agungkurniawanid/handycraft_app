@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:handycraft_app/core/models/supplier_model.dart';
+import 'package:handycraft_app/core/providers/supplier_provider.dart' show supplierRepositoryProvider;
 import 'package:iconsax/iconsax.dart';
 
 class AddSupplierScreen extends StatefulWidget {
-  const AddSupplierScreen({super.key});
+  final Supplier? supplier;
+  const AddSupplierScreen({super.key, this.supplier});
 
   @override
   State<AddSupplierScreen> createState() => _AddSupplierScreenState();
@@ -16,6 +20,17 @@ class _AddSupplierScreenState extends State<AddSupplierScreen> {
   final _descriptionController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.supplier != null) {
+      _nameController.text = widget.supplier!.name;
+      _phoneController.text = widget.supplier!.phone;
+      _addressController.text = widget.supplier!.address;
+      _descriptionController.text = widget.supplier!.description;
+    }
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
@@ -24,11 +39,41 @@ class _AddSupplierScreenState extends State<AddSupplierScreen> {
     super.dispose();
   }
 
+  Future<void> _saveSupplier(WidgetRef ref) async {
+    if (_formKey.currentState!.validate()) {
+      final repository = ref.read(supplierRepositoryProvider);
+      final supplier = Supplier(
+        id: widget.supplier?.id ?? '',
+        name: _nameController.text,
+        phone: _phoneController.text,
+        address: _addressController.text,
+        description: _descriptionController.text,
+      );
+
+      try {
+        if (widget.supplier == null) {
+          await repository.addSupplier(supplier);
+        } else {
+          await repository.updateSupplier(supplier);
+        }
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e')),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Supplier Baru'),
+        title: Text(widget.supplier == null ? 'Tambah Supplier' : 'Edit Supplier'),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Iconsax.arrow_left_2),
@@ -104,29 +149,29 @@ class _AddSupplierScreenState extends State<AddSupplierScreen> {
                 },
               ),
               const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      Navigator.pop(context);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+              Consumer(
+                builder: (context, ref, child) {
+                  return SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => _saveSupplier(ref),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Iconsax.save_2, size: 20),
+                          SizedBox(width: 8),
+                          Text('Simpan Supplier'),
+                        ],
+                      ),
                     ),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Iconsax.save_2, size: 20),
-                      SizedBox(width: 8),
-                      Text('Simpan Supplier'),
-                    ],
-                  ),
-                ),
+                  );
+                },
               ),
             ],
           ),

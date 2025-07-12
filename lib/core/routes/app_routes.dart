@@ -44,6 +44,11 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const SupplierScreen());
       case addSupplier:
         return MaterialPageRoute(builder: (_) => const AddSupplierScreen());
+      case supplierDetail:
+        final supplier = settings.arguments as Supplier;
+        return MaterialPageRoute(
+          builder: (_) => SupplierDetailScreen(supplier: supplier),
+        );
       case pelanggan:
         return MaterialPageRoute(builder: (_) => const PelangganScreen());
       case addPelanggan:
@@ -54,11 +59,6 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const AddKaryawanScreen());
       case addHonor:
         return MaterialPageRoute(builder: (_) => const AddHonorScreen());
-      case supplierDetail:
-        final supplier = settings.arguments as Supplier;
-        return MaterialPageRoute(
-          builder: (_) => SupplierDetailScreen(supplier: supplier),
-        );
       case pelangganDetail:
         final pelanggan = settings.arguments as Pelanggan;
         return MaterialPageRoute(

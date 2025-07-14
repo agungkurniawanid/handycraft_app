@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:handycraft_app/core/models/pengeluaran_model.dart';
-import 'package:handycraft_app/core/providers/pengeluaran_provider.dart';
 import 'package:handycraft_app/core/providers/product_provider.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,12 +24,14 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
   String? _selectedPelanggan;
   String? _selectedSatuan;
   String? _selectedNamaTransaksiBahanBaku;
+  String? _selectedNamaPelanggan;
 
   final List<String> _pelangganList = [
     'Pelanggan A',
     'Pelanggan B',
     'Pelanggan C',
   ];
+
   final List<String> _satuanList = ['Pcs', 'Lusin', 'Kg', 'Meter'];
 
   @override
@@ -47,7 +47,7 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final rawMaterialsAsync = ref.watch(rawMaterialsStreamProvider);
+    final rawMaterialsAsync = ref.watch(productsStreamProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -64,6 +64,7 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
           key: _formKey,
           child: Column(
             children: [
+              // input tanggal
               TextFormField(
                 controller: _tanggalController,
                 decoration: InputDecoration(
@@ -95,7 +96,7 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                 },
               ),
 
-              // todo: list bahan baku dropdown
+              // list product dropdown
               const SizedBox(height: 16),
               rawMaterialsAsync.when(
                 loading: () => const CircularProgressIndicator(),
@@ -104,7 +105,7 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                   return DropdownButtonFormField<String>(
                     value: _selectedNamaTransaksiBahanBaku,
                     decoration: InputDecoration(
-                      labelText: 'Transaksi/Bahan Baku',
+                      labelText: 'Transaksi/Product',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -129,7 +130,6 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                   );
                 },
               ),
-
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _selectedPelanggan,

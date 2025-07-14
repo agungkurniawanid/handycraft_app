@@ -8,7 +8,7 @@ import 'package:handycraft_app/screens/splash_screen.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:handycraft_app/firebase_options.dart' hide Firebase;
+import 'package:handycraft_app/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

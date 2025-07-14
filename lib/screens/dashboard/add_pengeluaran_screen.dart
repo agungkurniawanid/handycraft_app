@@ -15,10 +15,7 @@ class AddPengeluaranScreen extends ConsumerStatefulWidget {
 }
 
 class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
-  // control all controller textfield
   final _formKey = GlobalKey<FormState>();
-
-  // controller textfield for save data input in variable
   final TextEditingController _tanggalController = TextEditingController();
   final TextEditingController _namaTransaksiController =
       TextEditingController();

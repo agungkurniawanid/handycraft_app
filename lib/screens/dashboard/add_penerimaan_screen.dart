@@ -1,26 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:handycraft_app/core/models/pengeluaran_model.dart';
+import 'package:handycraft_app/core/providers/pengeluaran_provider.dart';
+import 'package:handycraft_app/core/providers/product_provider.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AddPenerimaanScreen extends StatefulWidget {
+class AddPenerimaanScreen extends ConsumerStatefulWidget {
   const AddPenerimaanScreen({super.key});
 
   @override
-  State<AddPenerimaanScreen> createState() => _AddPenerimaanScreenState();
+  ConsumerState<AddPenerimaanScreen> createState() =>
+      _AddPenerimaanScreenState();
 }
 
-class _AddPenerimaanScreenState extends State<AddPenerimaanScreen> {
+class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _tanggalController = TextEditingController();
-  final TextEditingController _namaTransaksiController = TextEditingController();
+  final TextEditingController _namaTransaksiController =
+      TextEditingController();
   final TextEditingController _kuantitasController = TextEditingController();
   final TextEditingController _hargaSatuanController = TextEditingController();
   final TextEditingController _totalController = TextEditingController();
   final TextEditingController _keteranganController = TextEditingController();
-  
+
   String? _selectedPelanggan;
   String? _selectedSatuan;
-  
-  final List<String> _pelangganList = ['Pelanggan A', 'Pelanggan B', 'Pelanggan C'];
+  String? _selectedNamaTransaksiBahanBaku;
+
+  final List<String> _pelangganList = [
+    'Pelanggan A',
+    'Pelanggan B',
+    'Pelanggan C',
+  ];
   final List<String> _satuanList = ['Pcs', 'Lusin', 'Kg', 'Meter'];
 
   @override
@@ -36,6 +47,8 @@ class _AddPenerimaanScreenState extends State<AddPenerimaanScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final rawMaterialsAsync = ref.watch(rawMaterialsStreamProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tambah Penerimaan'),
@@ -65,7 +78,8 @@ class _AddPenerimaanScreenState extends State<AddPenerimaanScreen> {
                         lastDate: DateTime(2100),
                       );
                       if (date != null) {
-                        _tanggalController.text = '${date.day}/${date.month}/${date.year}';
+                        _tanggalController.text =
+                            '${date.day}/${date.month}/${date.year}';
                       }
                     },
                   ),
@@ -80,22 +94,42 @@ class _AddPenerimaanScreenState extends State<AddPenerimaanScreen> {
                   return null;
                 },
               ),
+
+              // todo: list bahan baku dropdown
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _namaTransaksiController,
-                decoration: InputDecoration(
-                  labelText: 'Nama Transaksi',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Nama transaksi harus diisi';
-                  }
-                  return null;
+              rawMaterialsAsync.when(
+                loading: () => const CircularProgressIndicator(),
+                error: (err, _) => Text('Error: $err'),
+                data: (materials) {
+                  return DropdownButtonFormField<String>(
+                    value: _selectedNamaTransaksiBahanBaku,
+                    decoration: InputDecoration(
+                      labelText: 'Transaksi/Bahan Baku',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    items: materials.map((material) {
+                      return DropdownMenuItem<String>(
+                        value: material.id,
+                        child: Text(material.name),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedNamaTransaksiBahanBaku = value;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Nama Transaksi Bahan Baku harus di isi!';
+                      }
+                      return null;
+                    },
+                  );
                 },
               ),
+
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _selectedPelanggan,
@@ -230,9 +264,10 @@ class _AddPenerimaanScreenState extends State<AddPenerimaanScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      // Simpan data
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Penerimaan berhasil disimpan')),
+                        const SnackBar(
+                          content: Text('Penerimaan berhasil disimpan'),
+                        ),
                       );
                       Navigator.pop(context);
                     }

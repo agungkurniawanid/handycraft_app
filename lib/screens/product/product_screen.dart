@@ -5,14 +5,17 @@ import 'package:handycraft_app/core/providers/product_provider.dart';
 import 'package:handycraft_app/screens/product/add_bahan_screen.dart';
 import 'package:handycraft_app/screens/product/add_product_screen.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:intl/intl.dart';
+
+import 'edit_product_screen.dart';
 
 class ProductScreen extends ConsumerWidget {
   const ProductScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final materialsAsync = ref.watch(materialListProvider);
-    final productsAsync = ref.watch(productListProvider);
+    final materialsAsync = ref.watch(rawMaterialsStreamProvider);
+    final productsAsync = ref.watch(productsStreamProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -24,61 +27,86 @@ class ProductScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Bahan Baku Section
-            _buildSectionHeader(
-              context,
-              title: 'Data Bahan Baku',
-              onAddPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AddBahanScreen()),
-                );
-              },
-            ),
+            _buildSectionHeader(context, title: 'Data Bahan Baku', onAddPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const AddBahanScreen()));
+            }),
             const SizedBox(height: 12),
-            _buildMaterialList(materialsAsync),
+            _buildMaterialList(materialsAsync, ref, context),
             const SizedBox(height: 24),
-            
-            // Produk Section
-            _buildSectionHeader(
-              context,
-              title: 'Data Produk/Jasa',
-              onAddPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AddProductScreen()),
-                );
-              },
-            ),
+            _buildSectionHeader(context, title: 'Data Produk/Jasa', onAddPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const AddProductScreen()));
+            }),
             const SizedBox(height: 12),
-            _buildProductList(productsAsync),
+            _buildProductList(productsAsync, ref, context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSectionHeader(
-    BuildContext context, {
+  void _showDeleteConfirmationDialog(BuildContext context, {
     required String title,
-    required VoidCallback onAddPressed,
+    required String content,
+    required VoidCallback onConfirm,
   }) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Batal'),
+              onPressed: () => Navigator.of(dialogContext).pop(),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Hapus'),
+              onPressed: () {
+                onConfirm();
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildOptionsMenu(BuildContext context, {required VoidCallback onEdit, required VoidCallback onDelete}) {
+    return PopupMenuButton<String>(
+      icon: const Icon(Iconsax.more),
+      onSelected: (value) {
+        if (value == 'edit') {
+          onEdit();
+        } else if (value == 'delete') {
+          onDelete();
+        }
+      },
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+        const PopupMenuItem<String>(
+          value: 'edit',
+          child: ListTile(leading: Icon(Iconsax.edit), title: Text('Edit')),
+        ),
+        const PopupMenuItem<String>(
+          value: 'delete',
+          child: ListTile(leading: Icon(Iconsax.trash, color: Colors.red), title: Text('Hapus', style: TextStyle(color: Colors.red))),
+        ),
+      ],
+    );
+  }
+
+
+  Widget _buildSectionHeader(BuildContext context, {required String title, required VoidCallback onAddPressed}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
+        Text(title, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
         IconButton(
           icon: Container(
             padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary, shape: BoxShape.circle),
             child: const Icon(Iconsax.add, color: Colors.white, size: 20),
           ),
           onPressed: onAddPressed,
@@ -87,33 +115,31 @@ class ProductScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMaterialList(AsyncValue<List<RawMaterialModel>> asyncMaterials) {
+  Widget _buildMaterialList(AsyncValue<List<RawMaterialModel>> asyncMaterials, WidgetRef ref, BuildContext context) {
     return asyncMaterials.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, _) => Center(child: Text('Error: $err')),
-      data: (materials) => Column(
-        children: materials.map((material) => _buildMaterialCard(material)).toList(),
-      ),
+      data: (materials) {
+        if (materials.isEmpty) return const Center(child: Padding(padding: EdgeInsets.all(20.0), child: Text('Belum ada data bahan baku.')));
+        return Column(
+          children: materials.map((material) => _buildMaterialCard(material, ref, context)).toList(),
+        );
+      },
     );
   }
 
-  Widget _buildMaterialCard(RawMaterialModel material) {
+  Widget _buildMaterialCard(RawMaterialModel material, WidgetRef ref, BuildContext context) {
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), shape: BoxShape.circle),
               child: const Icon(Iconsax.box_1, color: Colors.blue),
             ),
             const SizedBox(width: 16),
@@ -121,27 +147,34 @@ class ProductScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    material.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
+                  Text(material.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   const SizedBox(height: 4),
-                  Text(
-                    'Harga: ${_formatCurrency(material.price)} / ${material.unit}',
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
+                  Text('Harga: ${_formatCurrency(material.price)} / ${material.unit}', style: TextStyle(color: Colors.grey.shade600)),
                 ],
               ),
             ),
-            IconButton(
-              icon: const Icon(Iconsax.more),
-              onPressed: () {
-                // Show material options
+            _buildOptionsMenu(
+              context,
+              onEdit: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => EditItemScreen(item: material, type: ItemType.rawMaterial)),
+                );
+              },
+              onDelete: () {
+                _showDeleteConfirmationDialog(
+                  context,
+                  title: 'Hapus Bahan Baku',
+                  content: 'Anda yakin ingin menghapus "${material.name}"?',
+                  onConfirm: () async {
+                    try {
+                      await ref.read(productRepositoryProvider).deleteRawMaterial(material.id);
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Bahan baku berhasil dihapus'), backgroundColor: Colors.green));
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal menghapus: $e'), backgroundColor: Colors.red));
+                    }
+                  },
+                );
               },
             ),
           ],
@@ -150,33 +183,31 @@ class ProductScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildProductList(AsyncValue<List<Product>> asyncProducts) {
+  Widget _buildProductList(AsyncValue<List<Product>> asyncProducts, WidgetRef ref, BuildContext context) {
     return asyncProducts.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, _) => Center(child: Text('Error: $err')),
-      data: (products) => Column(
-        children: products.map((product) => _buildProductCard(product)).toList(),
-      ),
+      data: (products) {
+        if (products.isEmpty) return const Center(child: Padding(padding: EdgeInsets.all(20.0), child: Text('Belum ada data produk.')));
+        return Column(
+          children: products.map((product) => _buildProductCard(product, ref, context)).toList(),
+        );
+      },
     );
   }
 
-  Widget _buildProductCard(Product product) {
+  Widget _buildProductCard(Product product, WidgetRef ref, BuildContext context) {
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), shape: BoxShape.circle),
               child: const Icon(Iconsax.shop, color: Colors.green),
             ),
             const SizedBox(width: 16),
@@ -184,27 +215,34 @@ class ProductScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    product.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
+                  Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   const SizedBox(height: 4),
-                  Text(
-                    'Harga: ${_formatCurrency(product.price)} / ${product.unit}',
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
+                  Text('Harga: ${_formatCurrency(product.price)} / ${product.unit}', style: TextStyle(color: Colors.grey.shade600)),
                 ],
               ),
             ),
-            IconButton(
-              icon: const Icon(Iconsax.more),
-              onPressed: () {
-                // Show product options
+            _buildOptionsMenu(
+              context,
+              onEdit: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => EditItemScreen(item: product, type: ItemType.product)),
+                );
+              },
+              onDelete: () {
+                _showDeleteConfirmationDialog(
+                  context,
+                  title: 'Hapus Produk',
+                  content: 'Anda yakin ingin menghapus "${product.name}"?',
+                  onConfirm: () async {
+                    try {
+                      await ref.read(productRepositoryProvider).deleteProduct(product.id);
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Produk berhasil dihapus'), backgroundColor: Colors.green));
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal menghapus: $e'), backgroundColor: Colors.red));
+                    }
+                  },
+                );
               },
             ),
           ],
@@ -214,9 +252,7 @@ class ProductScreen extends ConsumerWidget {
   }
 
   String _formatCurrency(double amount) {
-    return 'Rp${amount.toStringAsFixed(0).replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]}.',
-        )}';
+    final formatCurrency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    return formatCurrency.format(amount);
   }
 }

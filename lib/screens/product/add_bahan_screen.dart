@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:handycraft_app/core/models/product_model.dart';
+import 'package:handycraft_app/core/providers/product_provider.dart';
 import 'package:iconsax/iconsax.dart';
 
-class AddBahanScreen extends StatefulWidget {
+// 1. Ubah menjadi ConsumerStatefulWidget
+class AddBahanScreen extends ConsumerStatefulWidget {
   const AddBahanScreen({super.key});
 
   @override
-  State<AddBahanScreen> createState() => _AddBahanScreenState();
+  ConsumerState<AddBahanScreen> createState() => _AddBahanScreenState();
 }
 
-class _AddBahanScreenState extends State<AddBahanScreen> {
+class _AddBahanScreenState extends ConsumerState<AddBahanScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
   final _unitController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -20,6 +25,49 @@ class _AddBahanScreenState extends State<AddBahanScreen> {
     _priceController.dispose();
     _unitController.dispose();
     super.dispose();
+  }
+
+  Future<void> _saveMaterial() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    final material = RawMaterialModel(
+      id: '',
+      name: _nameController.text.trim(),
+      price: double.parse(_priceController.text.replaceAll('.', '')),
+      unit: _unitController.text.trim(),
+    );
+
+    try {
+      final repository = ref.read(productRepositoryProvider);
+      await repository.addRawMaterial(material);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Bahan baku berhasil disimpan!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal menyimpan bahan baku: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -38,6 +86,7 @@ class _AddBahanScreenState extends State<AddBahanScreen> {
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
                 controller: _nameController,
@@ -67,7 +116,7 @@ class _AddBahanScreenState extends State<AddBahanScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Harga tidak boleh kosong';
                   }
-                  if (double.tryParse(value) == null) {
+                  if (double.tryParse(value.replaceAll('.', '')) == null) {
                     return 'Masukkan angka yang valid';
                   }
                   return null;
@@ -89,34 +138,30 @@ class _AddBahanScreenState extends State<AddBahanScreen> {
                 },
               ),
               const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      // TODO: Implement save functionality
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Data bahan baku berhasil disimpan'),
-                        ),
-                      );
-                      Navigator.pop(context);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+              ElevatedButton(
+                onPressed: _isLoading ? null : _saveMaterial,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Iconsax.save_2, size: 20),
-                      SizedBox(width: 8),
-                      Text('Simpan Data'),
-                    ],
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 3,
                   ),
+                )
+                    : const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Iconsax.save_2, size: 20),
+                    SizedBox(width: 8),
+                    Text('Simpan Data'),
+                  ],
                 ),
               ),
             ],

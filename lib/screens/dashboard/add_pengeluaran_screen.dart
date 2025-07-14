@@ -1,27 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:handycraft_app/core/models/pengeluaran_model.dart';
+import 'package:handycraft_app/core/providers/pengeluaran_provider.dart';
+import 'package:handycraft_app/core/providers/product_provider.dart';
+import 'package:handycraft_app/core/providers/supplier_provider.dart';
 import 'package:iconsax/iconsax.dart';
 
-class AddPengeluaranScreen extends StatefulWidget {
+class AddPengeluaranScreen extends ConsumerStatefulWidget {
   const AddPengeluaranScreen({super.key});
 
   @override
-  State<AddPengeluaranScreen> createState() => _AddPengeluaranScreenState();
+  ConsumerState<AddPengeluaranScreen> createState() =>
+      _AddPengeluaranScreenState();
 }
 
-class _AddPengeluaranScreenState extends State<AddPengeluaranScreen> {
+class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _tanggalController = TextEditingController();
-  final TextEditingController _namaTransaksiController = TextEditingController();
+  final TextEditingController _namaTransaksiController =
+      TextEditingController();
   final TextEditingController _kuantitasController = TextEditingController();
   final TextEditingController _hargaSatuanController = TextEditingController();
   final TextEditingController _totalController = TextEditingController();
   final TextEditingController _keteranganController = TextEditingController();
-  
-  String? _selectedKaryawanSupplier;
+
   String? _selectedSatuan;
-  
-  final List<String> _karyawanSupplierList = ['Karyawan A', 'Karyawan B', 'Supplier X', 'Supplier Y'];
+  String? _selectedNameSupplier;
+  String? _selectedNamaTransaksiBahanBaku;
+
+  bool isLoading = false;
   final List<String> _satuanList = ['Pcs', 'Lusin', 'Kg', 'Meter'];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _kuantitasController.addListener(_updateTotal);
+    _hargaSatuanController.addListener(_updateTotal);
+  }
+
+  void _updateTotal() {
+    final kuantitas = num.tryParse(_kuantitasController.text.trim()) ?? 0;
+    final hargaSatuan = num.tryParse(_hargaSatuanController.text.trim()) ?? 0;
+    final total = kuantitas * hargaSatuan;
+
+    _totalController.text = total.toStringAsFixed(0);
+  }
 
   @override
   void dispose() {
@@ -34,8 +58,55 @@ class _AddPengeluaranScreenState extends State<AddPengeluaranScreen> {
     super.dispose();
   }
 
+  Future<void> _savePengeluaran() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => isLoading = true);
+
+    try {
+      final repository = ref.read(pengeluaranRepositoryProvider);
+
+      final newPengeluaran = Pengeluaran(
+        id: '',
+        tanggal: _tanggalController.text.trim(),
+        transaksi: _selectedNamaTransaksiBahanBaku ?? '',
+        supplierName: _selectedNameSupplier ?? '',
+        kuantitas: num.tryParse(_kuantitasController.text.trim()) ?? 0,
+        satuan: _selectedSatuan ?? '',
+        hargaSatuan: num.tryParse(_hargaSatuanController.text.trim()) ?? 0,
+        total: num.tryParse(_totalController.text.trim()) ?? 0,
+        keterangan: _keteranganController.text.trim(),
+      );
+
+      await repository.addPengeluaran(newPengeluaran);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pengeluaran berhasil disimpan'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal menyimpan: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // todo: call providers
+    final supplierProviderAsync = ref.watch(suppliersStreamProvider);
+    final rawMaterialsAsync = ref.watch(rawMaterialsStreamProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tambah Pengeluaran'),
@@ -65,7 +136,8 @@ class _AddPengeluaranScreenState extends State<AddPengeluaranScreen> {
                         lastDate: DateTime(2100),
                       );
                       if (date != null) {
-                        _tanggalController.text = '${date.day}/${date.month}/${date.year}';
+                        _tanggalController.text =
+                            '${date.day}/${date.month}/${date.year}';
                       }
                     },
                   ),
@@ -81,48 +153,74 @@ class _AddPengeluaranScreenState extends State<AddPengeluaranScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _namaTransaksiController,
-                decoration: InputDecoration(
-                  labelText: 'Nama Transaksi',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Nama transaksi harus diisi';
-                  }
-                  return null;
+              rawMaterialsAsync.when(
+                loading: () => const CircularProgressIndicator(),
+                error: (err, _) => Text('Error: $err'),
+                data: (materials) {
+                  return DropdownButtonFormField<String>(
+                    value: _selectedNamaTransaksiBahanBaku,
+                    decoration: InputDecoration(
+                      labelText: 'Transaksi/Bahan Baku',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    items: materials.map((material) {
+                      return DropdownMenuItem<String>(
+                        value: material.id,
+                        child: Text(material.name),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedNamaTransaksiBahanBaku = value;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Nama Transaksi Bahan Baku harus di isi!';
+                      }
+                      return null;
+                    },
+                  );
                 },
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: _selectedKaryawanSupplier,
-                decoration: InputDecoration(
-                  labelText: 'Karyawan/Supplier',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                items: _karyawanSupplierList.map((item) {
-                  return DropdownMenuItem(
-                    value: item,
-                    child: Text(item),
+
+              // todo: supplier list dropdown
+              supplierProviderAsync.when(
+                loading: () => const CircularProgressIndicator(),
+                error: (err, _) => Text('Error: $err'),
+                data: (materials) {
+                  return DropdownButtonFormField<String>(
+                    value: _selectedNameSupplier,
+                    decoration: InputDecoration(
+                      labelText: 'Nama Supplier',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    items: materials.map((material) {
+                      return DropdownMenuItem<String>(
+                        value: material.id,
+                        child: Text(material.name),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedNameSupplier = value;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Nama Supplier harus di isi!';
+                      }
+                      return null;
+                    },
                   );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedKaryawanSupplier = value;
-                  });
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Harus dipilih';
-                  }
-                  return null;
                 },
               ),
+
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -199,6 +297,7 @@ class _AddPengeluaranScreenState extends State<AddPengeluaranScreen> {
               TextFormField(
                 controller: _totalController,
                 keyboardType: TextInputType.number,
+                readOnly: true,
                 decoration: InputDecoration(
                   labelText: 'Total',
                   prefixText: 'Rp ',
@@ -228,22 +327,30 @@ class _AddPengeluaranScreenState extends State<AddPengeluaranScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      // Simpan data
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Pengeluaran berhasil disimpan')),
-                      );
-                      Navigator.pop(context);
-                    }
-                  },
+                  onPressed: isLoading ? null : _savePengeluaran,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text('Simpan Pengeluaran'),
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 3,
+                          ),
+                        )
+                      : const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Iconsax.save_2, size: 20),
+                            SizedBox(width: 8),
+                            Text('Simpan Pengeluaran'),
+                          ],
+                        ),
                 ),
               ),
             ],

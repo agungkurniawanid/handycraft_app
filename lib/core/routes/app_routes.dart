@@ -10,6 +10,7 @@ import 'package:handycraft_app/screens/pelanggan/pelanggan_screen.dart';
 import 'package:handycraft_app/screens/product/add_bahan_screen.dart';
 import 'package:handycraft_app/screens/product/add_product_screen.dart';
 import 'package:handycraft_app/screens/product/product_screen.dart';
+import 'package:handycraft_app/screens/settings/setting_screen.dart';
 import 'package:handycraft_app/screens/supplier/add_supplier_screen.dart';
 import 'package:handycraft_app/screens/supplier/supplier_detail_screen.dart';
 import 'package:handycraft_app/screens/supplier/supplier_screen.dart';
@@ -29,6 +30,9 @@ class AppRoutes {
   static const String karyawan = '/karyawan';
   static const String addKaryawan = '/karyawan/add';
   static const String addHonor = '/karyawan/add-honor';
+
+  // route setings
+  static const String settingsPage = '/settingsPage';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -64,6 +68,8 @@ class AppRoutes {
         return MaterialPageRoute(
           builder: (_) => PelangganDetailScreen(pelanggan: pelanggan),
         );
+      case settingsPage:
+        return MaterialPageRoute(builder: (_) => const SettingScreen());
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

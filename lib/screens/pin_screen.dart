@@ -43,18 +43,18 @@ class _PinScreenState extends ConsumerState<PinScreen> {
 
   Future<void> _verifyPin() async {
     setState(() => _isLoading = true);
-    
+
     await Future.delayed(const Duration(milliseconds: 300));
-    
+
     if (_enteredPin == _correctPin) {
       await Future.delayed(const Duration(milliseconds: 200));
       if (mounted) {
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) => const MainNavigation(), // Changed to MainNavigation
-            transitionsBuilder: (_, a, __, c) => 
-              FadeTransition(opacity: a, child: c),
+            pageBuilder: (_, __, ___) => const MainNavigation(),
+            transitionsBuilder: (_, a, __, c) =>
+                FadeTransition(opacity: a, child: c),
             transitionDuration: const Duration(milliseconds: 500),
           ),
         );
@@ -66,7 +66,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
         _enteredPin = "";
       });
     }
-    
+
     setState(() => _isLoading = false);
   }
 
@@ -75,15 +75,15 @@ class _PinScreenState extends ConsumerState<PinScreen> {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
     final primaryColor = theme.colorScheme.primary;
-    final backgroundColor = isDarkMode 
-        ? Colors.grey.shade900 
+    final backgroundColor = isDarkMode
+        ? Colors.grey.shade900
         : Colors.grey.shade50;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: isDarkMode 
-            ? Brightness.light 
+        statusBarIconBrightness: isDarkMode
+            ? Brightness.light
             : Brightness.dark,
       ),
       child: Scaffold(
@@ -101,10 +101,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
                     height: 80,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [
-                          primaryColor,
-                          primaryColor.withOpacity(0.7),
-                        ],
+                        colors: [primaryColor, primaryColor.withOpacity(0.7)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -117,11 +114,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
                         ),
                       ],
                     ),
-                    child: Icon(
-                      Iconsax.lock,
-                      size: 36,
-                      color: Colors.white,
-                    ),
+                    child: Icon(Iconsax.lock, size: 36, color: Colors.white),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -160,20 +153,25 @@ class _PinScreenState extends ConsumerState<PinScreen> {
                                 children: List.generate(6, (index) {
                                   return AnimatedContainer(
                                     duration: const Duration(milliseconds: 150),
-                                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                                    margin: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
                                     width: _enteredPin.length > index ? 20 : 16,
-                                    height: _enteredPin.length > index ? 20 : 16,
+                                    height: _enteredPin.length > index
+                                        ? 20
+                                        : 16,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       color: _enteredPin.length > index
                                           ? _isError
-                                              ? Colors.red.shade400
-                                              : primaryColor
+                                                ? Colors.red.shade400
+                                                : primaryColor
                                           : Colors.transparent,
                                       border: Border.all(
                                         color: _isError
                                             ? Colors.red.shade400
-                                            : theme.colorScheme.onSurface.withOpacity(0.3),
+                                            : theme.colorScheme.onSurface
+                                                  .withOpacity(0.3),
                                         width: 2,
                                       ),
                                     ),
@@ -203,7 +201,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
                     ),
                   ],
                 ),
-                
+
                 const Spacer(),
                 GridView.count(
                   shrinkWrap: true,
@@ -260,15 +258,13 @@ class _PinNumberButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(40),
         onTap: () => onPressed(number),
         child: Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(shape: BoxShape.circle),
           child: Center(
             child: Text(
               number,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w500),
             ),
           ),
         ),
@@ -281,10 +277,7 @@ class _PinBackButton extends StatelessWidget {
   final VoidCallback onPressed;
   final bool isActive;
 
-  const _PinBackButton({
-    required this.onPressed,
-    required this.isActive,
-  });
+  const _PinBackButton({required this.onPressed, required this.isActive});
 
   @override
   Widget build(BuildContext context) {
@@ -294,9 +287,7 @@ class _PinBackButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(40),
         onTap: isActive ? onPressed : null,
         child: Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(shape: BoxShape.circle),
           child: Center(
             child: Icon(
               Iconsax.back_square,

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:handycraft_app/core/providers/theme_provider.dart';
+import 'package:handycraft_app/core/routes/app_routes.dart';
+import 'package:handycraft_app/screens/settings/setting_screen.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:handycraft_app/screens/dashboard/add_penerimaan_screen.dart';
 import 'package:handycraft_app/screens/dashboard/add_pengeluaran_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -25,8 +29,11 @@ class _DashboardState extends ConsumerState<DashboardScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard HandyCraft'),
-        centerTitle: true,
+        title: Text(
+          'Dashboard HandyCraft',
+          style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: false,
         actions: [
           IconButton(
             icon: Icon(
@@ -34,6 +41,17 @@ class _DashboardState extends ConsumerState<DashboardScreen> {
               color: isDarkMode ? Colors.amber : Colors.blueGrey,
             ),
             onPressed: () => ref.read(themeProvider.notifier).toggleTheme(),
+          ),
+          IconButton(
+            icon: const Icon(Iconsax.setting_2),
+            onPressed: () {
+              PersistentNavBarNavigator.pushNewScreen(
+                context,
+                screen: const SettingScreen(),
+                withNavBar: false,
+                pageTransitionAnimation: PageTransitionAnimation.cupertino,
+              );
+            },
           ),
         ],
       ),

@@ -15,7 +15,10 @@ class AddPengeluaranScreen extends ConsumerStatefulWidget {
 }
 
 class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
+  // control all controller textfield
   final _formKey = GlobalKey<FormState>();
+
+  // controller textfield for save data input in variable
   final TextEditingController _tanggalController = TextEditingController();
   final TextEditingController _namaTransaksiController =
       TextEditingController();
@@ -24,17 +27,20 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
   final TextEditingController _totalController = TextEditingController();
   final TextEditingController _keteranganController = TextEditingController();
 
+  // for list dropdown texfield input
   String? _selectedSatuan;
   String? _selectedNameSupplier;
   String? _selectedNamaTransaksiBahanBaku;
 
-  bool isLoading = false;
+  // for list dropdown textfield satuan
   final List<String> _satuanList = ['Pcs', 'Lusin', 'Kg', 'Meter'];
+
+  // for loading state logic
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-
     _kuantitasController.addListener(_updateTotal);
     _hargaSatuanController.addListener(_updateTotal);
   }
@@ -43,7 +49,6 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
     final kuantitas = num.tryParse(_kuantitasController.text.trim()) ?? 0;
     final hargaSatuan = num.tryParse(_hargaSatuanController.text.trim()) ?? 0;
     final total = kuantitas * hargaSatuan;
-
     _totalController.text = total.toStringAsFixed(0);
   }
 
@@ -58,14 +63,12 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
     super.dispose();
   }
 
+  /* save data function button and save to firebase. */
   Future<void> _savePengeluaran() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => isLoading = true);
-
     try {
       final repository = ref.read(pengeluaranRepositoryProvider);
-
       final newPengeluaran = Pengeluaran(
         id: '',
         tanggal: _tanggalController.text.trim(),
@@ -77,9 +80,7 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
         total: num.tryParse(_totalController.text.trim()) ?? 0,
         keterangan: _keteranganController.text.trim(),
       );
-
       await repository.addPengeluaran(newPengeluaran);
-
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -103,7 +104,7 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // todo: call providers
+    // call providers
     final supplierProviderAsync = ref.watch(suppliersStreamProvider);
     final rawMaterialsAsync = ref.watch(rawMaterialsStreamProvider);
 
@@ -122,6 +123,7 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
           key: _formKey,
           child: Column(
             children: [
+              // input tanggal
               TextFormField(
                 controller: _tanggalController,
                 decoration: InputDecoration(
@@ -152,6 +154,8 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
                   return null;
                 },
               ),
+
+              // input nama transaksi bahan baku
               const SizedBox(height: 16),
               rawMaterialsAsync.when(
                 loading: () => const CircularProgressIndicator(),
@@ -185,9 +189,9 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
                   );
                 },
               ),
-              const SizedBox(height: 16),
 
-              // todo: supplier list dropdown
+              // supplier list dropdown
+              const SizedBox(height: 16),
               supplierProviderAsync.when(
                 loading: () => const CircularProgressIndicator(),
                 error: (err, _) => Text('Error: $err'),
@@ -221,6 +225,7 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
                 },
               ),
 
+              // input kuantitas
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -243,6 +248,8 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
                       },
                     ),
                   ),
+
+                  // input satuan
                   const SizedBox(width: 16),
                   Expanded(
                     flex: 2,
@@ -275,6 +282,8 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
                   ),
                 ],
               ),
+
+              // input harga satuan
               const SizedBox(height: 16),
               TextFormField(
                 controller: _hargaSatuanController,
@@ -293,6 +302,8 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
                   return null;
                 },
               ),
+
+              // input total
               const SizedBox(height: 16),
               TextFormField(
                 controller: _totalController,
@@ -312,6 +323,8 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
                   return null;
                 },
               ),
+
+              // input keterangan
               const SizedBox(height: 16),
               TextFormField(
                 controller: _keteranganController,
@@ -323,6 +336,8 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
                 ),
                 maxLines: 3,
               ),
+
+              // button save
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,

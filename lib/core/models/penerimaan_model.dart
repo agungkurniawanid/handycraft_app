@@ -1,21 +1,21 @@
 import 'package:firebase_database/firebase_database.dart';
 
-class Pengeluaran {
+class PenerimaanModel {
   final String id;
   final String tanggal;
   final String transaksi;
-  final String supplierName;
+  final String pelanggan;
   final num kuantitas;
   final String satuan;
   final num hargaSatuan;
   final num total;
   final String keterangan;
 
-  Pengeluaran({
+  PenerimaanModel({
     required this.id,
     required this.tanggal,
     required this.transaksi,
-    required this.supplierName,
+    required this.pelanggan,
     required this.kuantitas,
     required this.satuan,
     required this.hargaSatuan,
@@ -23,13 +23,13 @@ class Pengeluaran {
     required this.keterangan,
   });
 
-  factory Pengeluaran.fromSnapshot(DataSnapshot snapshot) {
+  factory PenerimaanModel.fromSnapshot(DataSnapshot snapshot) {
     final data = snapshot.value as Map<dynamic, dynamic>;
-    return Pengeluaran(
+    return PenerimaanModel(
       id: snapshot.key ?? '',
       tanggal: data['tanggal'] as String,
       transaksi: data['transaksi'] as String,
-      supplierName: data['supplierName'] as String,
+      pelanggan: data['pelanggan'] as String,
       kuantitas: data['kuantitas'] as num,
       satuan: data['satuan'] as String,
       hargaSatuan: data['hargaSatuan'] as num,
@@ -43,7 +43,7 @@ class Pengeluaran {
       'id': id,
       'tanggal': tanggal,
       'transaksi': transaksi,
-      'supplierName': supplierName,
+      'pelanggan': pelanggan,
       'kuantitas': kuantitas,
       'satuan': satuan,
       'hargaSatuan': hargaSatuan,

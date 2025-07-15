@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:handycraft_app/core/extensions/penerimaan_extension.dart';
+import 'package:handycraft_app/core/extensions/pengeluaran_extension.dart';
 import 'package:handycraft_app/core/models/pengeluaran_model.dart';
 
 class PengeluaranRepository {

@@ -24,15 +24,12 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
   final TextEditingController _totalController = TextEditingController();
   final TextEditingController _keteranganController = TextEditingController();
 
-  // for list dropdown texfield input
   String? _selectedSatuan;
   String? _selectedNameSupplier;
   String? _selectedNamaTransaksiBahanBaku;
 
-  // for list dropdown textfield satuan
   final List<String> _satuanList = ['Pcs', 'Lusin', 'Kg', 'Meter'];
 
-  // for loading state logic
   bool isLoading = false;
 
   @override
@@ -60,7 +57,6 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
     super.dispose();
   }
 
-  /* save data function button and save to firebase. */
   Future<void> _savePengeluaran() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => isLoading = true);
@@ -168,7 +164,7 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
                     ),
                     items: materials.map((material) {
                       return DropdownMenuItem<String>(
-                        value: material.id,
+                        value: material.name,
                         child: Text(material.name),
                       );
                     }).toList(),
@@ -203,7 +199,7 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
                     ),
                     items: materials.map((material) {
                       return DropdownMenuItem<String>(
-                        value: material.id,
+                        value: material.name,
                         child: Text(material.name),
                       );
                     }).toList(),

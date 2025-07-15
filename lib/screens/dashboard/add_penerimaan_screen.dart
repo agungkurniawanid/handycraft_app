@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:handycraft_app/core/models/penerimaan_model.dart';
+import 'package:handycraft_app/core/providers/penerimaan_provider.dart';
 import 'package:handycraft_app/core/providers/product_provider.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,7 +26,6 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
   String? _selectedPelanggan;
   String? _selectedSatuan;
   String? _selectedNamaTransaksiBahanBaku;
-  String? _selectedNamaPelanggan;
 
   final List<String> _pelangganList = [
     'Pelanggan A',
@@ -33,6 +34,19 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
   ];
 
   final List<String> _satuanList = ['Pcs', 'Lusin', 'Kg', 'Meter'];
+
+  void initState() {
+    super.initState();
+    _kuantitasController.addListener(_updateTotal);
+    _hargaSatuanController.addListener(_updateTotal);
+  }
+
+  void _updateTotal() {
+    final kuantitas = num.tryParse(_kuantitasController.text.trim()) ?? 0;
+    final hargaSatuan = num.tryParse(_hargaSatuanController.text.trim()) ?? 0;
+    final total = kuantitas * hargaSatuan;
+    _totalController.text = total.toStringAsFixed(0);
+  }
 
   @override
   void dispose() {
@@ -43,6 +57,46 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
     _totalController.dispose();
     _keteranganController.dispose();
     super.dispose();
+  }
+
+  bool isLoading = false;
+
+  Future<void> _savePenerimaan() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => isLoading = true);
+    try {
+      final repository = ref.read(penerimaanRepositoryProvider);
+      final newPengeluaran = PenerimaanModel(
+        id: '',
+        tanggal: _tanggalController.text.trim(),
+        transaksi: _selectedNamaTransaksiBahanBaku ?? '',
+        pelanggan: _selectedPelanggan ?? '',
+        kuantitas: num.tryParse(_kuantitasController.text.trim()) ?? 0,
+        satuan: _selectedSatuan ?? '',
+        hargaSatuan: num.tryParse(_hargaSatuanController.text.trim()) ?? 0,
+        total: num.tryParse(_totalController.text.trim()) ?? 0,
+        keterangan: _keteranganController.text.trim(),
+      );
+      await repository.addPenerimaan(newPengeluaran);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Penerimaan berhasil disimpan'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal menyimpan: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => isLoading = false);
+    }
   }
 
   @override
@@ -112,7 +166,7 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                     ),
                     items: materials.map((material) {
                       return DropdownMenuItem<String>(
-                        value: material.id,
+                        value: material.name,
                         child: Text(material.name),
                       );
                     }).toList(),
@@ -229,9 +283,11 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                   return null;
                 },
               ),
+
               const SizedBox(height: 16),
               TextFormField(
                 controller: _totalController,
+                readOnly: true,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: 'Total',
@@ -262,23 +318,30 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Penerimaan berhasil disimpan'),
-                        ),
-                      );
-                      Navigator.pop(context);
-                    }
-                  },
+                  onPressed: isLoading ? null : _savePenerimaan,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text('Simpan Penerimaan'),
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 3,
+                          ),
+                        )
+                      : const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Iconsax.save_2, size: 20),
+                            SizedBox(width: 8),
+                            Text('Simpan Penerimaan'),
+                          ],
+                        ),
                 ),
               ),
             ],

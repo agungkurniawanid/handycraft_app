@@ -404,16 +404,40 @@ class DashboardScreen extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Text(
-            'Pembelian Pelanggan',
-            style: textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-              fontSize: 20,
-              color: textColor,
+        Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                'Pembelian Pelanggan',
+                style: textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 20,
+                  color: textColor,
+                ),
+              ),
             ),
-          ),
+            const Spacer(),
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () => {},
+                  child: Text(
+                    'Lihat Semua',
+                    style: textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.blueAccent,
+                    ),
+                  ),
+                ),
+                const Icon(
+                  Iconsax.arrow_right_1,
+                  size: 20,
+                  color: Colors.blueAccent,
+                ),
+              ],
+            ),
+          ],
         ),
         const SizedBox(height: 12),
         ...pengeluaranList.take(7).map((transaction) {
@@ -666,18 +690,42 @@ class DashboardScreen extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Text(
-            'Pengeluaran Terakhir',
-            style: textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-              fontSize: 20,
-              color: textColor,
+        Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                'Pengeluaran Bahan',
+                style: textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 20,
+                  color: textColor,
+                ),
+              ),
             ),
-          ),
+            const Spacer(),
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () => {},
+                  child: Text(
+                    'Lihat Semua',
+                    style: textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.blueAccent,
+                    ),
+                  ),
+                ),
+                const Icon(
+                  Iconsax.arrow_right_1,
+                  size: 20,
+                  color: Colors.blueAccent,
+                ),
+              ],
+            ),
+          ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         ...pengeluaranList.take(7).map((transaction) {
           final formattedAmount = _formatCurrency(transaction.total);
           final (_, formattedDate) = parseTransactionDate(transaction);
@@ -1368,16 +1416,40 @@ class DashboardScreen extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                'Pengeluaran Gaji Karyawan',
-                style: textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 20,
-                  color: textColor,
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    'Pengeluaran Gaji',
+                    style: textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 20,
+                      color: textColor,
+                    ),
+                  ),
                 ),
-              ),
+                const Spacer(),
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => {},
+                      child: Text(
+                        'Lihat Semua',
+                        style: textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.blueAccent,
+                        ),
+                      ),
+                    ),
+                    const Icon(
+                      Iconsax.arrow_right_1,
+                      size: 20,
+                      color: Colors.blueAccent,
+                    ),
+                  ],
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             ...pengeluaranGajiList.take(7).map((transaction) {
@@ -1429,7 +1501,9 @@ class DashboardScreen extends ConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    transaction.namaKaryawan,
+                                    capitalizeEachWord(
+                                      transaction.namaKaryawan,
+                                    ),
                                     style: textTheme.bodyMedium?.copyWith(
                                       fontWeight: FontWeight.w600,
                                       fontSize: 16,
@@ -1545,7 +1619,7 @@ class DashboardScreen extends ConsumerWidget {
                                 ),
                               ),
                               Text(
-                                transaction.jenisPekerjaan!,
+                                capitalizeEachWord(transaction.jenisPekerjaan!),
                                 style: textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.w500,
                                   color: textColor,
@@ -1585,7 +1659,7 @@ class DashboardScreen extends ConsumerWidget {
                               ),
                             ),
                             Text(
-                              transaction.keterangan,
+                              capitalizeEachWord(transaction.keterangan),
                               style: textTheme.bodyMedium?.copyWith(
                                 color: textColor,
                               ),

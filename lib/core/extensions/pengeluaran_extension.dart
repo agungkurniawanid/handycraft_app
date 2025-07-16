@@ -25,3 +25,33 @@ extension PengeluaranExtension on Pengeluaran {
     );
   }
 }
+
+extension PengeluaranGajiKaryawanExtension on PengeluaranGajiKaryawan {
+  PengeluaranGajiKaryawan copyWith({
+    String? id,
+    String? karyawanId,
+    String? namaKaryawan,
+    String? tanggalPengeluaranGaji,
+    num? jumlahGaji,
+    num? total,
+    String? keterangan,
+    String? honorId,
+    String? jenisPekerjaan,
+    String? tipeSatuan,
+  }) {
+    return PengeluaranGajiKaryawan(
+      id: id ?? this.id,
+      karyawanId: karyawanId ?? this.karyawanId,
+      namaKaryawan: namaKaryawan ?? this.namaKaryawan,
+      tanggalPengeluaranGaji:
+          tanggalPengeluaranGaji ?? this.tanggalPengeluaranGaji,
+      jumlahGaji: jumlahGaji ?? this.jumlahGaji,
+      total: total ?? this.total,
+      keterangan: keterangan ?? this.keterangan,
+      honorId: honorId ?? this.honorId,
+      jenisPekerjaan: jenisPekerjaan ?? this.jenisPekerjaan,
+      statusKaryawan: statusKaryawan ?? statusKaryawan,
+      tipeSatuan: tipeSatuan ?? this.tipeSatuan,
+    );
+  }
+}

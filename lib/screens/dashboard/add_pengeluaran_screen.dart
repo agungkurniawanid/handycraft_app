@@ -7,6 +7,7 @@ import 'package:handycraft_app/core/providers/pengeluaran_provider.dart';
 import 'package:handycraft_app/core/providers/product_provider.dart';
 import 'package:handycraft_app/core/providers/supplier_provider.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:intl/intl.dart';
 
 class AddPengeluaranScreen extends ConsumerStatefulWidget {
   const AddPengeluaranScreen({super.key});
@@ -18,13 +19,13 @@ class AddPengeluaranScreen extends ConsumerStatefulWidget {
 
 class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _tanggalController = TextEditingController();
   final TextEditingController _kuantitasController = TextEditingController();
   final TextEditingController _hargaSatuanController = TextEditingController();
   final TextEditingController _totalController = TextEditingController();
   final TextEditingController _keteranganController = TextEditingController();
   final TextEditingController _satuanController = TextEditingController();
 
+  DateTime? _selectedDate;
   String? _selectedNameSupplier;
   String? _selectedNamaTransaksiBahanBaku;
   bool isLoading = false;
@@ -34,6 +35,7 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
     super.initState();
     _kuantitasController.addListener(_updateTotal);
     _hargaSatuanController.addListener(_updateTotal);
+    _selectedDate = DateTime.now();
   }
 
   void _updateTotal() {
@@ -56,7 +58,6 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
 
   @override
   void dispose() {
-    _tanggalController.dispose();
     _kuantitasController.dispose();
     _hargaSatuanController.dispose();
     _totalController.dispose();
@@ -72,7 +73,7 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
       final repository = ref.read(pengeluaranRepositoryProvider);
       final newPengeluaran = Pengeluaran(
         id: '',
-        tanggal: _tanggalController.text.trim(),
+        tanggal: DateFormat('yyyy-MM-dd').format(_selectedDate!),
         transaksi: _selectedNamaTransaksiBahanBaku ?? '',
         supplierName: _selectedNameSupplier ?? '',
         kuantitas: num.tryParse(_kuantitasController.text.trim()) ?? 0,
@@ -124,39 +125,34 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
           key: _formKey,
           child: Column(
             children: [
-              // input tanggal
-              TextFormField(
-                controller: _tanggalController,
-                decoration: InputDecoration(
-                  labelText: 'Tanggal',
-                  suffixIcon: IconButton(
-                    icon: const Icon(Iconsax.calendar),
-                    onPressed: () async {
-                      final date = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2100),
-                      );
-                      if (date != null) {
-                        _tanggalController.text =
-                            '${date.day}/${date.month}/${date.year}';
-                      }
-                    },
+              InkWell(
+                onTap: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: _selectedDate ?? DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+                  if (date != null) {
+                    setState(() => _selectedDate = date);
+                  }
+                },
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: 'Tanggal',
+                    suffixIcon: const Icon(Iconsax.calendar),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  child: Text(
+                    _selectedDate != null
+                        ? DateFormat('dd/MM/yyyy').format(_selectedDate!)
+                        : 'Pilih Tanggal',
                   ),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Tanggal harus diisi';
-                  }
-                  return null;
-                },
               ),
 
-              // input nama transaksi bahan baku
               const SizedBox(height: 16),
               rawMaterialsAsync.when(
                 loading: () => const CircularProgressIndicator(),

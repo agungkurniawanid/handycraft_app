@@ -6,6 +6,7 @@ import 'package:handycraft_app/core/providers/penerimaan_provider.dart';
 import 'package:handycraft_app/core/providers/product_provider.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 class EditPenerimaanScreen extends ConsumerStatefulWidget {
   final String penerimaanId;
@@ -68,7 +69,8 @@ class _EditPenerimaanScreenState extends ConsumerState<EditPenerimaanScreen> {
         setState(() {
           _penerimaanData = data;
           if (data != null) {
-            _tanggalController.text = data.tanggal;
+            final date = DateFormat('yyyy-MM-dd').parse(data.tanggal);
+            _tanggalController.text = DateFormat('dd/MM/yyyy').format(date);
             _kuantitasController.text = data.kuantitas.toString();
             _hargaSatuanController.text = data.hargaSatuan.toInt().toString();
             _totalController.text = data.total.toString();
@@ -96,9 +98,13 @@ class _EditPenerimaanScreenState extends ConsumerState<EditPenerimaanScreen> {
     setState(() => _isSaving = true);
 
     try {
+      final parsedDate = DateFormat(
+        'dd/MM/yyyy',
+      ).parse(_tanggalController.text);
+      final firebaseDate = DateFormat('yyyy-MM-dd').format(parsedDate);
       final updatedData = PenerimaanModel(
         id: widget.penerimaanId,
-        tanggal: _tanggalController.text,
+        tanggal: firebaseDate,
         transaksi: _selectedNamaTransaksiBahanBaku ?? '',
         pelanggan: _selectedPelanggan ?? '',
         kuantitas: num.parse(_kuantitasController.text),
@@ -208,7 +214,6 @@ class _EditPenerimaanScreenState extends ConsumerState<EditPenerimaanScreen> {
           key: _formKey,
           child: Column(
             children: [
-              // Input tanggal
               TextFormField(
                 controller: _tanggalController,
                 decoration: InputDecoration(
@@ -216,15 +221,22 @@ class _EditPenerimaanScreenState extends ConsumerState<EditPenerimaanScreen> {
                   suffixIcon: IconButton(
                     icon: const Icon(Iconsax.calendar),
                     onPressed: () async {
+                      final initialDate = _tanggalController.text.isNotEmpty
+                          ? DateFormat(
+                              'dd/MM/yyyy',
+                            ).parse(_tanggalController.text)
+                          : DateTime.now();
+
                       final date = await showDatePicker(
                         context: context,
-                        initialDate: DateTime.now(),
+                        initialDate: initialDate,
                         firstDate: DateTime(2000),
                         lastDate: DateTime(2100),
                       );
                       if (date != null) {
-                        _tanggalController.text =
-                            '${date.day}/${date.month}/${date.year}';
+                        _tanggalController.text = DateFormat(
+                          'dd/MM/yyyy',
+                        ).format(date);
                       }
                     },
                   ),

@@ -51,3 +51,60 @@ class PengeluaranRepository {
     return null;
   }
 }
+
+class PengeluaranGajiKaryawanRepository {
+  final FirebaseApp _firebaseApp = Firebase.app('MyAppInstance');
+  late final DatabaseReference _dbRef;
+
+  PengeluaranGajiKaryawanRepository() {
+    _dbRef = FirebaseDatabase.instanceFor(app: _firebaseApp).ref();
+  }
+
+  Future<void> addPengeluaranGajiKaryawan(
+    PengeluaranGajiKaryawan pengeluaran,
+  ) async {
+    final newRef = _dbRef.child('master_data/pengeluaran_gaji_karyawan').push();
+    await newRef.set(pengeluaran.copyWith(id: newRef.key).toJson());
+  }
+
+  Future<void> updatePengeluaranGajiKaryawan(
+    PengeluaranGajiKaryawan pengeluaran,
+  ) async {
+    await _dbRef
+        .child('master_data/pengeluaran_gaji_karyawan')
+        .child(pengeluaran.id)
+        .update(pengeluaran.toJson());
+  }
+
+  Future<void> deletePengeluaranGajiKaryawan(String id) async {
+    await _dbRef
+        .child('master_data/pengeluaran_gaji_karyawan')
+        .child(id)
+        .remove();
+  }
+
+  Stream<List<PengeluaranGajiKaryawan>> getPengeluaranGajiKaryawanStream() {
+    final query = _dbRef.child('master_data/pengeluaran_gaji_karyawan');
+    return query.onValue.map((event) {
+      if (event.snapshot.exists && event.snapshot.value != null) {
+        return event.snapshot.children.map((snapshot) {
+          return PengeluaranGajiKaryawan.fromSnapshot(snapshot);
+        }).toList();
+      }
+      return [];
+    });
+  }
+
+  Future<PengeluaranGajiKaryawan?> getPengeluaranById(String id) async {
+    final snapshot = await _dbRef
+        .child('master_data/pengeluaran_gaji_karyawan')
+        .child(id)
+        .get();
+    if (snapshot.exists) {
+      return PengeluaranGajiKaryawan.fromSnapshot(snapshot);
+    }
+    return null;
+  }
+
+  /*******  b8fb4b81-9c39-4900-b038-3a20a190dfc9  *******/
+}

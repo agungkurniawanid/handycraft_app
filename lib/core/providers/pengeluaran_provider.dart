@@ -12,3 +12,14 @@ final pengeluaranStreamProvider = StreamProvider.autoDispose<List<Pengeluaran>>(
     return repository.getPengeluaranStream();
   },
 );
+
+final pengeluaranGajiKaryawanRepositoryProvider =
+    Provider<PengeluaranGajiKaryawanRepository>((ref) {
+      return PengeluaranGajiKaryawanRepository();
+    });
+
+final pengeluaranGajiKaryawanStreamProvider =
+    StreamProvider.autoDispose<List<PengeluaranGajiKaryawan>>((ref) {
+      final repository = ref.watch(pengeluaranGajiKaryawanRepositoryProvider);
+      return repository.getPengeluaranGajiKaryawanStream();
+    });

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:handycraft_app/core/extensions/penerimaan_extension.dart';
 import 'package:handycraft_app/core/models/penerimaan_model.dart';
 import 'package:handycraft_app/core/models/product_model.dart';
 import 'package:handycraft_app/core/providers/pelanggan_provider.dart';
@@ -8,37 +7,146 @@ import 'package:handycraft_app/core/providers/product_provider.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AddPenerimaanScreen extends ConsumerStatefulWidget {
-  const AddPenerimaanScreen({super.key});
+class EditPenerimaanScreen extends ConsumerStatefulWidget {
+  final String penerimaanId;
+
+  const EditPenerimaanScreen({super.key, required this.penerimaanId});
 
   @override
-  ConsumerState<AddPenerimaanScreen> createState() =>
-      _AddPenerimaanScreenState();
+  ConsumerState<EditPenerimaanScreen> createState() =>
+      _EditPenerimaanScreenState();
 }
 
-class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
+class _EditPenerimaanScreenState extends ConsumerState<EditPenerimaanScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _tanggalController = TextEditingController();
-  final TextEditingController _kuantitasController = TextEditingController();
-  final TextEditingController _hargaSatuanController = TextEditingController();
-  final TextEditingController _totalController = TextEditingController();
-  final TextEditingController _keteranganController = TextEditingController();
-  final TextEditingController _satuanController = TextEditingController();
+  late TextEditingController _tanggalController;
+  late TextEditingController _kuantitasController;
+  late TextEditingController _hargaSatuanController;
+  late TextEditingController _totalController;
+  late TextEditingController _keteranganController;
+  late TextEditingController _satuanController;
 
   String? _selectedPelanggan;
   String? _selectedNamaTransaksiBahanBaku;
+  bool _isLoading = true;
+  bool _isSaving = false;
+  PenerimaanModel? _penerimaanData;
+  Product? _selectedProduct;
 
+  @override
   void initState() {
     super.initState();
-    _kuantitasController.addListener(_updateTotal);
-    _hargaSatuanController.addListener(_updateTotal);
+    _initializeControllers();
+    _loadPenerimaanData();
   }
 
-  void _updateTotal() {
-    final kuantitas = num.tryParse(_kuantitasController.text.trim()) ?? 0;
-    final hargaSatuan = num.tryParse(_hargaSatuanController.text.trim()) ?? 0;
+  void _initializeControllers() {
+    _tanggalController = TextEditingController();
+    _kuantitasController = TextEditingController();
+    _hargaSatuanController = TextEditingController();
+    _totalController = TextEditingController();
+    _keteranganController = TextEditingController();
+    _satuanController = TextEditingController();
+
+    _kuantitasController.addListener(_calculateTotal);
+    _hargaSatuanController.addListener(_calculateTotal);
+  }
+
+  void _calculateTotal() {
+    final kuantitas = num.tryParse(_kuantitasController.text) ?? 0;
+    final hargaSatuan = num.tryParse(_hargaSatuanController.text) ?? 0;
     final total = kuantitas * hargaSatuan;
     _totalController.text = total.toStringAsFixed(0);
+  }
+
+  Future<void> _loadPenerimaanData() async {
+    try {
+      final repository = ref.read(penerimaanRepositoryProvider);
+      final data = await repository.getPenerimaanById(widget.penerimaanId);
+
+      if (mounted) {
+        setState(() {
+          _penerimaanData = data;
+          if (data != null) {
+            _tanggalController.text = data.tanggal;
+            _kuantitasController.text = data.kuantitas.toString();
+            _hargaSatuanController.text = data.hargaSatuan.toInt().toString();
+            _totalController.text = data.total.toString();
+            _keteranganController.text = data.keterangan;
+            _selectedPelanggan = data.pelanggan;
+            _satuanController.text = data.satuan;
+            _selectedNamaTransaksiBahanBaku = data.transaksi;
+          }
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memuat data: ${e.toString()}')),
+        );
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  Future<void> _updatePenerimaan() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isSaving = true);
+
+    try {
+      final updatedData = PenerimaanModel(
+        id: widget.penerimaanId,
+        tanggal: _tanggalController.text,
+        transaksi: _selectedNamaTransaksiBahanBaku ?? '',
+        pelanggan: _selectedPelanggan ?? '',
+        kuantitas: num.parse(_kuantitasController.text),
+        satuan: _satuanController.text,
+        hargaSatuan: num.parse(_hargaSatuanController.text),
+        total: num.parse(_totalController.text),
+        keterangan: _keteranganController.text,
+      );
+
+      await ref
+          .read(penerimaanRepositoryProvider)
+          .updatePenerimaan(updatedData);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Data berhasil diperbarui'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal memperbarui: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
+  }
+
+  void _handleProductChange(Product? selectedProduct) {
+    if (selectedProduct != null) {
+      setState(() {
+        _selectedProduct = selectedProduct;
+        _selectedNamaTransaksiBahanBaku = selectedProduct.name;
+        _hargaSatuanController.text = selectedProduct.price.toInt().toString();
+        _satuanController.text = selectedProduct.unit;
+      });
+      _calculateTotal();
+    }
   }
 
   @override
@@ -52,65 +160,42 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
     super.dispose();
   }
 
-  bool isLoading = false;
-
-  Future<void> _savePenerimaan() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => isLoading = true);
-    try {
-      final repository = ref.read(penerimaanRepositoryProvider);
-      final newPengeluaran = PenerimaanModel(
-        id: '',
-        tanggal: _tanggalController.text.trim(),
-        transaksi: _selectedNamaTransaksiBahanBaku ?? '',
-        pelanggan: _selectedPelanggan ?? '',
-        kuantitas: num.tryParse(_kuantitasController.text.trim()) ?? 0,
-        satuan: _satuanController.text.trim(),
-        hargaSatuan: num.tryParse(_hargaSatuanController.text.trim()) ?? 0,
-        total: num.tryParse(_totalController.text.trim()) ?? 0,
-        keterangan: _keteranganController.text.trim(),
-      );
-      await repository.addPenerimaan(newPengeluaran);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Penerimaan berhasil disimpan'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      Navigator.pop(context);
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal menyimpan: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => isLoading = false);
-    }
-  }
-
-  void _handleProductChange(Product? selectedProduct) {
-    if (selectedProduct != null) {
-      setState(() {
-        _selectedNamaTransaksiBahanBaku = selectedProduct.name;
-        _hargaSatuanController.text = selectedProduct.price.toInt().toString();
-        _satuanController.text = selectedProduct.unit;
-      });
-      _updateTotal();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final rawMaterialsAsync = ref.watch(productsStreamProvider);
     final pelangganAsync = ref.watch(pelanggansStreamProvider);
 
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Edit Penerimaan'),
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Iconsax.arrow_left_2),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_penerimaanData == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Edit Penerimaan'),
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Iconsax.arrow_left_2),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: const Center(child: Text('Data tidak ditemukan')),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Penerimaan'),
+        title: const Text('Edit Penerimaan'),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Iconsax.arrow_left_2),
@@ -123,7 +208,7 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
           key: _formKey,
           child: Column(
             children: [
-              // input tanggal
+              // Input tanggal
               TextFormField(
                 controller: _tanggalController,
                 decoration: InputDecoration(
@@ -155,32 +240,39 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                 },
               ),
 
-              // list product dropdown
+              // Dropdown product
               const SizedBox(height: 16),
               rawMaterialsAsync.when(
                 loading: () => const CircularProgressIndicator(),
                 error: (err, _) => Text('Error: $err'),
-                data: (materials) {
+                data: (products) {
+                  // Find the current product if it exists
+                  final currentProduct = products.firstWhere(
+                    (p) => p.name == _selectedNamaTransaksiBahanBaku,
+                    orElse: () =>
+                        Product(id: '', name: '', price: 0, unit: 'pcs'),
+                  );
+
                   return DropdownButtonFormField<Product>(
-                    value: materials.firstWhereOrNull(
-                      (m) => m.name == _selectedNamaTransaksiBahanBaku,
-                    ),
+                    value: currentProduct.name.isNotEmpty
+                        ? currentProduct
+                        : null,
                     decoration: InputDecoration(
                       labelText: 'Transaksi/Product',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    items: materials.map((material) {
+                    items: products.map((product) {
                       return DropdownMenuItem<Product>(
-                        value: material,
-                        child: Text(material.name),
+                        value: product,
+                        child: Text(product.name),
                       );
                     }).toList(),
                     onChanged: _handleProductChange,
                     validator: (value) {
                       if (value == null) {
-                        return 'Nama Transaksi Product harus di isi!';
+                        return 'Nama Transaksi harus diisi';
                       }
                       return null;
                     },
@@ -193,10 +285,14 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                 loading: () => const CircularProgressIndicator(),
                 error: (err, _) => Text('Error: $err'),
                 data: (pelanggans) {
+                  if (_selectedPelanggan != null &&
+                      !pelanggans.any((p) => p.name == _selectedPelanggan)) {
+                    _selectedPelanggan = null;
+                  }
                   return DropdownButtonFormField<String>(
                     value: _selectedPelanggan,
                     decoration: InputDecoration(
-                      labelText: 'Nama Pelanggan',
+                      labelText: 'Pelanggan',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -214,7 +310,7 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                     },
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Nama Supplier harus di isi!';
+                        return 'Nama Pelanggan harus diisi';
                       }
                       return null;
                     },
@@ -266,6 +362,8 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                   ),
                 ],
               ),
+
+              // Harga Satuan
               const SizedBox(height: 16),
               TextFormField(
                 controller: _hargaSatuanController,
@@ -286,6 +384,7 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                 },
               ),
 
+              // Total
               const SizedBox(height: 16),
               TextFormField(
                 controller: _totalController,
@@ -298,13 +397,9 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Total harus diisi';
-                  }
-                  return null;
-                },
               ),
+
+              // Keterangan
               const SizedBox(height: 16),
               TextFormField(
                 controller: _keteranganController,
@@ -316,18 +411,20 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                 ),
                 maxLines: 3,
               ),
+
+              // Tombol Simpan
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: isLoading ? null : _savePenerimaan,
+                  onPressed: _isSaving ? null : _updatePenerimaan,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: isLoading
+                  child: _isSaving
                       ? const SizedBox(
                           height: 24,
                           width: 24,
@@ -341,7 +438,7 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                           children: [
                             Icon(Iconsax.save_2, size: 20),
                             SizedBox(width: 8),
-                            Text('Simpan Penerimaan'),
+                            Text('Simpan Perubahan'),
                           ],
                         ),
                 ),

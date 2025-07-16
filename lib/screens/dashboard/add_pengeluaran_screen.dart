@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:handycraft_app/core/extensions/penerimaan_extension.dart';
 import 'package:handycraft_app/core/models/pengeluaran_model.dart';
+import 'package:handycraft_app/core/models/product_model.dart';
 import 'package:handycraft_app/core/providers/pengeluaran_provider.dart';
 import 'package:handycraft_app/core/providers/product_provider.dart';
 import 'package:handycraft_app/core/providers/supplier_provider.dart';
@@ -17,19 +19,14 @@ class AddPengeluaranScreen extends ConsumerStatefulWidget {
 class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _tanggalController = TextEditingController();
-  final TextEditingController _namaTransaksiController =
-      TextEditingController();
   final TextEditingController _kuantitasController = TextEditingController();
   final TextEditingController _hargaSatuanController = TextEditingController();
   final TextEditingController _totalController = TextEditingController();
   final TextEditingController _keteranganController = TextEditingController();
+  final TextEditingController _satuanController = TextEditingController();
 
-  String? _selectedSatuan;
   String? _selectedNameSupplier;
   String? _selectedNamaTransaksiBahanBaku;
-
-  final List<String> _satuanList = ['Pcs', 'Lusin', 'Kg', 'Meter'];
-
   bool isLoading = false;
 
   @override
@@ -46,14 +43,25 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
     _totalController.text = total.toStringAsFixed(0);
   }
 
+  void _handleMaterialChange(RawMaterialModel? selectedMaterial) {
+    if (selectedMaterial != null) {
+      setState(() {
+        _selectedNamaTransaksiBahanBaku = selectedMaterial.name;
+        _hargaSatuanController.text = selectedMaterial.price.toInt().toString();
+        _satuanController.text = selectedMaterial.unit;
+      });
+      _updateTotal();
+    }
+  }
+
   @override
   void dispose() {
     _tanggalController.dispose();
-    _namaTransaksiController.dispose();
     _kuantitasController.dispose();
     _hargaSatuanController.dispose();
     _totalController.dispose();
     _keteranganController.dispose();
+    _satuanController.dispose();
     super.dispose();
   }
 
@@ -68,7 +76,7 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
         transaksi: _selectedNamaTransaksiBahanBaku ?? '',
         supplierName: _selectedNameSupplier ?? '',
         kuantitas: num.tryParse(_kuantitasController.text.trim()) ?? 0,
-        satuan: _selectedSatuan ?? '',
+        satuan: _satuanController.text.trim(),
         hargaSatuan: num.tryParse(_hargaSatuanController.text.trim()) ?? 0,
         total: num.tryParse(_totalController.text.trim()) ?? 0,
         keterangan: _keteranganController.text.trim(),
@@ -154,8 +162,10 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
                 loading: () => const CircularProgressIndicator(),
                 error: (err, _) => Text('Error: $err'),
                 data: (materials) {
-                  return DropdownButtonFormField<String>(
-                    value: _selectedNamaTransaksiBahanBaku,
+                  return DropdownButtonFormField<RawMaterialModel>(
+                    value: materials.firstWhereOrNull(
+                      (m) => m.name == _selectedNamaTransaksiBahanBaku,
+                    ),
                     decoration: InputDecoration(
                       labelText: 'Transaksi/Bahan Baku',
                       border: OutlineInputBorder(
@@ -163,18 +173,14 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
                       ),
                     ),
                     items: materials.map((material) {
-                      return DropdownMenuItem<String>(
-                        value: material.name,
+                      return DropdownMenuItem<RawMaterialModel>(
+                        value: material,
                         child: Text(material.name),
                       );
                     }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedNamaTransaksiBahanBaku = value;
-                      });
-                    },
+                    onChanged: _handleMaterialChange,
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
+                      if (value == null) {
                         return 'Nama Transaksi Bahan Baku harus di isi!';
                       }
                       return null;
@@ -188,7 +194,7 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
               supplierProviderAsync.when(
                 loading: () => const CircularProgressIndicator(),
                 error: (err, _) => Text('Error: $err'),
-                data: (materials) {
+                data: (suppliers) {
                   return DropdownButtonFormField<String>(
                     value: _selectedNameSupplier,
                     decoration: InputDecoration(
@@ -197,10 +203,10 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    items: materials.map((material) {
+                    items: suppliers.map((supplier) {
                       return DropdownMenuItem<String>(
-                        value: material.name,
-                        child: Text(material.name),
+                        value: supplier.name,
+                        child: Text(supplier.name),
                       );
                     }).toList(),
                     onChanged: (value) {
@@ -218,7 +224,7 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
                 },
               ),
 
-              // input kuantitas
+              // input kuantitas dan satuan
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -241,33 +247,21 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
                       },
                     ),
                   ),
-
-                  // input satuan
                   const SizedBox(width: 16),
                   Expanded(
                     flex: 2,
-                    child: DropdownButtonFormField<String>(
-                      value: _selectedSatuan,
+                    child: TextFormField(
+                      controller: _satuanController,
+                      readOnly: true,
                       decoration: InputDecoration(
                         labelText: 'Satuan',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      items: _satuanList.map((satuan) {
-                        return DropdownMenuItem(
-                          value: satuan,
-                          child: Text(satuan),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedSatuan = value;
-                        });
-                      },
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Satuan harus dipilih';
+                          return 'Satuan harus diisi';
                         }
                         return null;
                       },
@@ -280,6 +274,7 @@ class _AddPengeluaranScreenState extends ConsumerState<AddPengeluaranScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _hargaSatuanController,
+                readOnly: true,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: 'Harga Satuan',

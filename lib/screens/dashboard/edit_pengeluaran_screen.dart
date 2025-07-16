@@ -1,44 +1,147 @@
 import 'package:flutter/material.dart';
-import 'package:handycraft_app/core/extensions/penerimaan_extension.dart';
-import 'package:handycraft_app/core/models/penerimaan_model.dart';
-import 'package:handycraft_app/core/models/product_model.dart';
-import 'package:handycraft_app/core/providers/pelanggan_provider.dart';
-import 'package:handycraft_app/core/providers/penerimaan_provider.dart';
-import 'package:handycraft_app/core/providers/product_provider.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:handycraft_app/core/models/pengeluaran_model.dart';
+import 'package:handycraft_app/core/models/product_model.dart';
+import 'package:handycraft_app/core/providers/pengeluaran_provider.dart';
+import 'package:handycraft_app/core/providers/product_provider.dart';
+import 'package:handycraft_app/core/providers/supplier_provider.dart';
+import 'package:iconsax/iconsax.dart';
 
-class AddPenerimaanScreen extends ConsumerStatefulWidget {
-  const AddPenerimaanScreen({super.key});
+class EditPengeluaranScreen extends ConsumerStatefulWidget {
+  final String pengeluaranId;
+  const EditPengeluaranScreen({super.key, required this.pengeluaranId});
 
   @override
-  ConsumerState<AddPenerimaanScreen> createState() =>
-      _AddPenerimaanScreenState();
+  ConsumerState<EditPengeluaranScreen> createState() =>
+      _EditPengeluaranScreenState();
 }
 
-class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
+class _EditPengeluaranScreenState extends ConsumerState<EditPengeluaranScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _tanggalController = TextEditingController();
-  final TextEditingController _kuantitasController = TextEditingController();
-  final TextEditingController _hargaSatuanController = TextEditingController();
-  final TextEditingController _totalController = TextEditingController();
-  final TextEditingController _keteranganController = TextEditingController();
-  final TextEditingController _satuanController = TextEditingController();
+  late TextEditingController _tanggalController;
+  late TextEditingController _kuantitasController;
+  late TextEditingController _hargaSatuanController;
+  late TextEditingController _totalController;
+  late TextEditingController _keteranganController;
 
-  String? _selectedPelanggan;
-  String? _selectedNamaTransaksiBahanBaku;
+  String? _selectedSupplier;
+  RawMaterialModel? _selectedRawMaterial;
+  bool _isLoading = true;
+  bool _isSaving = false;
+  String? _selectedUnit;
+  Pengeluaran? _pengeluaranData;
 
+  @override
   void initState() {
     super.initState();
-    _kuantitasController.addListener(_updateTotal);
-    _hargaSatuanController.addListener(_updateTotal);
+    _initializeControllers();
+    _loadPengeluaranData();
   }
 
-  void _updateTotal() {
-    final kuantitas = num.tryParse(_kuantitasController.text.trim()) ?? 0;
-    final hargaSatuan = num.tryParse(_hargaSatuanController.text.trim()) ?? 0;
+  void _initializeControllers() {
+    _tanggalController = TextEditingController();
+    _kuantitasController = TextEditingController();
+    _hargaSatuanController = TextEditingController();
+    _totalController = TextEditingController();
+    _keteranganController = TextEditingController();
+
+    _kuantitasController.addListener(_calculateTotal);
+    _hargaSatuanController.addListener(_calculateTotal);
+  }
+
+  void _calculateTotal() {
+    final kuantitas = num.tryParse(_kuantitasController.text) ?? 0;
+    final hargaSatuan = num.tryParse(_hargaSatuanController.text) ?? 0;
     final total = kuantitas * hargaSatuan;
     _totalController.text = total.toStringAsFixed(0);
+  }
+
+  Future<void> _loadPengeluaranData() async {
+    try {
+      final repository = ref.read(pengeluaranRepositoryProvider);
+      final data = await repository.getPengeluaranById(widget.pengeluaranId);
+
+      if (mounted) {
+        setState(() {
+          _pengeluaranData = data;
+          if (data != null) {
+            _tanggalController.text = data.tanggal;
+            _kuantitasController.text = data.kuantitas.toString();
+            _hargaSatuanController.text = data.hargaSatuan.toInt().toString();
+            _totalController.text = data.total.toString();
+            _keteranganController.text = data.keterangan;
+            _selectedSupplier = data.supplierName;
+            _selectedUnit = data.satuan;
+          }
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memuat data: ${e.toString()}')),
+        );
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  Future<void> _updatePengeluaran() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isSaving = true);
+
+    try {
+      final updatedData = Pengeluaran(
+        id: widget.pengeluaranId,
+        tanggal: _tanggalController.text,
+        transaksi: _selectedRawMaterial?.name ?? '',
+        supplierName: _selectedSupplier ?? '',
+        kuantitas: num.parse(_kuantitasController.text),
+        satuan: _selectedUnit ?? _selectedRawMaterial?.unit ?? '',
+        hargaSatuan: num.parse(_hargaSatuanController.text),
+        total: num.parse(_totalController.text),
+        keterangan: _keteranganController.text,
+      );
+
+      await ref
+          .read(pengeluaranRepositoryProvider)
+          .updatePengeluaran(updatedData);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Data berhasil diperbarui'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal memperbarui: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
+  }
+
+  void _handleRawMaterialChange(RawMaterialModel? selectedMaterial) {
+    if (selectedMaterial != null) {
+      setState(() {
+        _selectedRawMaterial = selectedMaterial;
+        _selectedUnit = selectedMaterial.unit; // Tambahkan ini
+        _hargaSatuanController.text = selectedMaterial.price.toStringAsFixed(0);
+      });
+      _calculateTotal();
+    }
   }
 
   @override
@@ -48,69 +151,45 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
     _hargaSatuanController.dispose();
     _totalController.dispose();
     _keteranganController.dispose();
-    _satuanController.dispose();
     super.dispose();
-  }
-
-  bool isLoading = false;
-
-  Future<void> _savePenerimaan() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => isLoading = true);
-    try {
-      final repository = ref.read(penerimaanRepositoryProvider);
-      final newPengeluaran = PenerimaanModel(
-        id: '',
-        tanggal: _tanggalController.text.trim(),
-        transaksi: _selectedNamaTransaksiBahanBaku ?? '',
-        pelanggan: _selectedPelanggan ?? '',
-        kuantitas: num.tryParse(_kuantitasController.text.trim()) ?? 0,
-        satuan: _satuanController.text.trim(),
-        hargaSatuan: num.tryParse(_hargaSatuanController.text.trim()) ?? 0,
-        total: num.tryParse(_totalController.text.trim()) ?? 0,
-        keterangan: _keteranganController.text.trim(),
-      );
-      await repository.addPenerimaan(newPengeluaran);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Penerimaan berhasil disimpan'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      Navigator.pop(context);
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal menyimpan: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => isLoading = false);
-    }
-  }
-
-  void _handleProductChange(Product? selectedProduct) {
-    if (selectedProduct != null) {
-      setState(() {
-        _selectedNamaTransaksiBahanBaku = selectedProduct.name;
-        _hargaSatuanController.text = selectedProduct.price.toInt().toString();
-        _satuanController.text = selectedProduct.unit;
-      });
-      _updateTotal();
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final rawMaterialsAsync = ref.watch(productsStreamProvider);
-    final pelangganAsync = ref.watch(pelanggansStreamProvider);
+    final rawMaterialsAsync = ref.watch(rawMaterialsStreamProvider);
+    final supplierAsync = ref.watch(suppliersStreamProvider);
+
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Edit Pengeluaran'),
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Iconsax.arrow_left_2),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_pengeluaranData == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Edit Pengeluaran'),
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Iconsax.arrow_left_2),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: const Center(child: Text('Data tidak ditemukan')),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Penerimaan'),
+        title: const Text('Edit Pengeluaran'),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Iconsax.arrow_left_2),
@@ -123,7 +202,7 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
           key: _formKey,
           child: Column(
             children: [
-              // input tanggal
+              // Input tanggal
               TextFormField(
                 controller: _tanggalController,
                 decoration: InputDecoration(
@@ -155,32 +234,45 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                 },
               ),
 
-              // list product dropdown
+              // Dropdown bahan baku
               const SizedBox(height: 16),
               rawMaterialsAsync.when(
                 loading: () => const CircularProgressIndicator(),
                 error: (err, _) => Text('Error: $err'),
                 data: (materials) {
-                  return DropdownButtonFormField<Product>(
-                    value: materials.firstWhereOrNull(
-                      (m) => m.name == _selectedNamaTransaksiBahanBaku,
-                    ),
+                  // Find current material if exists
+                  final currentMaterial = _pengeluaranData?.transaksi != null
+                      ? materials.firstWhere(
+                          (m) => m.name == _pengeluaranData?.transaksi,
+                          orElse: () => RawMaterialModel(
+                            id: '',
+                            name: '',
+                            price: 0,
+                            unit: '',
+                          ),
+                        )
+                      : null;
+
+                  return DropdownButtonFormField<RawMaterialModel>(
+                    value: currentMaterial?.name.isNotEmpty == true
+                        ? currentMaterial
+                        : null,
                     decoration: InputDecoration(
-                      labelText: 'Transaksi/Product',
+                      labelText: 'Bahan Baku',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                     items: materials.map((material) {
-                      return DropdownMenuItem<Product>(
+                      return DropdownMenuItem<RawMaterialModel>(
                         value: material,
                         child: Text(material.name),
                       );
                     }).toList(),
-                    onChanged: _handleProductChange,
+                    onChanged: _handleRawMaterialChange,
                     validator: (value) {
                       if (value == null) {
-                        return 'Nama Transaksi Product harus di isi!';
+                        return 'Bahan baku harus dipilih';
                       }
                       return null;
                     },
@@ -188,33 +280,38 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                 },
               ),
 
+              // Dropdown supplier
               const SizedBox(height: 16),
-              pelangganAsync.when(
+              supplierAsync.when(
                 loading: () => const CircularProgressIndicator(),
                 error: (err, _) => Text('Error: $err'),
-                data: (pelanggans) {
+                data: (suppliers) {
+                  if (_selectedSupplier != null &&
+                      !suppliers.any((s) => s.name == _selectedSupplier)) {
+                    _selectedSupplier = null;
+                  }
                   return DropdownButtonFormField<String>(
-                    value: _selectedPelanggan,
+                    value: _selectedSupplier,
                     decoration: InputDecoration(
-                      labelText: 'Nama Pelanggan',
+                      labelText: 'Supplier',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    items: pelanggans.map((pelanggan) {
+                    items: suppliers.map((supplier) {
                       return DropdownMenuItem<String>(
-                        value: pelanggan.name,
-                        child: Text(pelanggan.name),
+                        value: supplier.name,
+                        child: Text(supplier.name),
                       );
                     }).toList(),
                     onChanged: (value) {
                       setState(() {
-                        _selectedPelanggan = value;
+                        _selectedSupplier = value;
                       });
                     },
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Nama Supplier harus di isi!';
+                        return 'Supplier harus dipilih';
                       }
                       return null;
                     },
@@ -222,6 +319,7 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                 },
               ),
 
+              // Kuantitas dan Satuan
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -240,6 +338,9 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                         if (value == null || value.isEmpty) {
                           return 'Kuantitas harus diisi';
                         }
+                        if (num.tryParse(value) == null) {
+                          return 'Harus berupa angka';
+                        }
                         return null;
                       },
                     ),
@@ -248,7 +349,9 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                   Expanded(
                     flex: 2,
                     child: TextFormField(
-                      controller: _satuanController,
+                      controller: TextEditingController(
+                        text: _selectedUnit ?? '',
+                      ),
                       readOnly: true,
                       decoration: InputDecoration(
                         labelText: 'Satuan',
@@ -258,7 +361,7 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Satuan harus diisi';
+                          return 'Satuan harus ada';
                         }
                         return null;
                       },
@@ -266,11 +369,13 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                   ),
                 ],
               ),
+
+              // Harga Satuan
               const SizedBox(height: 16),
               TextFormField(
                 controller: _hargaSatuanController,
-                readOnly: true,
                 keyboardType: TextInputType.number,
+                readOnly: true,
                 decoration: InputDecoration(
                   labelText: 'Harga Satuan',
                   prefixText: 'Rp ',
@@ -282,15 +387,18 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Harga satuan harus diisi';
                   }
+                  if (num.tryParse(value) == null) {
+                    return 'Harus berupa angka';
+                  }
                   return null;
                 },
               ),
 
+              // Total
               const SizedBox(height: 16),
               TextFormField(
                 controller: _totalController,
                 readOnly: true,
-                keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: 'Total',
                   prefixText: 'Rp ',
@@ -298,13 +406,9 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Total harus diisi';
-                  }
-                  return null;
-                },
               ),
+
+              // Keterangan
               const SizedBox(height: 16),
               TextFormField(
                 controller: _keteranganController,
@@ -316,18 +420,20 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                 ),
                 maxLines: 3,
               ),
+
+              // Tombol Simpan
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: isLoading ? null : _savePenerimaan,
+                  onPressed: _isSaving ? null : _updatePengeluaran,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: isLoading
+                  child: _isSaving
                       ? const SizedBox(
                           height: 24,
                           width: 24,
@@ -341,7 +447,7 @@ class _AddPenerimaanScreenState extends ConsumerState<AddPenerimaanScreen> {
                           children: [
                             Icon(Iconsax.save_2, size: 20),
                             SizedBox(width: 8),
-                            Text('Simpan Penerimaan'),
+                            Text('Simpan Perubahan'),
                           ],
                         ),
                 ),

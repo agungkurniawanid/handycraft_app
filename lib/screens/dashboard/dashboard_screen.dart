@@ -5,6 +5,8 @@ import 'package:handycraft_app/core/models/pengeluaran_model.dart';
 import 'package:handycraft_app/core/providers/penerimaan_provider.dart';
 import 'package:handycraft_app/core/providers/pengeluaran_provider.dart';
 import 'package:handycraft_app/core/providers/theme_provider.dart';
+import 'package:handycraft_app/screens/dashboard/edit_penerimaan_screen.dart';
+import 'package:handycraft_app/screens/dashboard/edit_pengeluaran_screen.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:handycraft_app/screens/dashboard/add_penerimaan_screen.dart';
 import 'package:handycraft_app/screens/dashboard/add_pengeluaran_screen.dart';
@@ -394,7 +396,16 @@ class DashboardScreen extends ConsumerWidget {
                                 ),
                               ],
                             ),
-                            onTap: () => {},
+                            onTap: () => {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EditPenerimaanScreen(
+                                    penerimaanId: transaction.id,
+                                  ),
+                                ),
+                              ),
+                            },
                           ),
                           PopupMenuItem(
                             child: Row(
@@ -619,7 +630,16 @@ class DashboardScreen extends ConsumerWidget {
                                 ),
                               ],
                             ),
-                            onTap: () => {},
+                            onTap: () => {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EditPengeluaranScreen(
+                                    pengeluaranId: transaction.id,
+                                  ),
+                                ),
+                              ),
+                            },
                           ),
                           PopupMenuItem(
                             child: Row(

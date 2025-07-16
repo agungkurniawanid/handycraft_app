@@ -4,11 +4,32 @@ import 'package:handycraft_app/core/models/supplier_model.dart';
 import 'package:handycraft_app/core/providers/supplier_provider.dart' show supplierRepositoryProvider;
 import 'package:handycraft_app/screens/supplier/add_supplier_screen.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SupplierDetailScreen extends ConsumerWidget {
   final Supplier supplier;
 
   const SupplierDetailScreen({super.key, required this.supplier});
+
+  Future<void> _launchWhatsApp(BuildContext context, String phoneNumber) async {
+    String formattedPhoneNumber = phoneNumber.trim();
+    if (formattedPhoneNumber.startsWith('0')) {
+      formattedPhoneNumber = '62${formattedPhoneNumber.substring(1)}';
+    }
+    formattedPhoneNumber = formattedPhoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
+
+    final Uri whatsappUrl = Uri.parse('https://wa.me/$formattedPhoneNumber');
+
+    if (await canLaunchUrl(whatsappUrl)) {
+      await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Tidak bisa membuka WhatsApp untuk nomor $phoneNumber')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,14 +57,8 @@ class SupplierDetailScreen extends ConsumerWidget {
                   title: const Text('Hapus Supplier'),
                   content: const Text('Apakah Anda yakin ingin menghapus supplier ini?'),
                   actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Batal'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Hapus', style: TextStyle(color: Colors.red)),
-                    ),
+                    TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Batal')),
+                    TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Hapus', style: TextStyle(color: Colors.red))),
                   ],
                 ),
               );
@@ -52,15 +67,9 @@ class SupplierDetailScreen extends ConsumerWidget {
                 try {
                   final repository = ref.read(supplierRepositoryProvider);
                   await repository.deleteSupplier(supplier.id);
-                  if (context.mounted) {
-                    Navigator.pop(context);
-                  }
+                  if (context.mounted) Navigator.pop(context);
                 } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e')),
-                    );
-                  }
+                  if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
                 }
               }
             },
@@ -75,93 +84,47 @@ class SupplierDetailScreen extends ConsumerWidget {
             Center(
               child: Container(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Iconsax.shop,
-                  size: 40,
-                  color: Colors.orange,
-                ),
+                decoration: BoxDecoration(color: Colors.orange.withOpacity(0.1), shape: BoxShape.circle),
+                child: const Icon(Iconsax.shop, size: 40, color: Colors.orange),
               ),
             ),
             const SizedBox(height: 24),
             Card(
               elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    _buildDetailItem(
-                      context,
-                      icon: Iconsax.user,
-                      label: 'Nama Supplier',
-                      value: supplier.name,
-                    ),
+                    _buildDetailItem(context, icon: Iconsax.user, label: 'Nama Supplier', value: supplier.name),
                     const Divider(),
-                    _buildDetailItem(
-                      context,
-                      icon: Iconsax.call,
-                      label: 'Telepon',
-                      value: supplier.phone,
-                    ),
+                    _buildDetailItem(context, icon: Iconsax.call, label: 'Telepon', value: supplier.phone),
                     const Divider(),
-                    _buildDetailItem(
-                      context,
-                      icon: Iconsax.location,
-                      label: 'Alamat',
-                      value: supplier.address,
-                    ),
+                    _buildDetailItem(context, icon: Iconsax.location, label: 'Alamat', value: supplier.address),
                     const Divider(),
-                    _buildDetailItem(
-                      context,
-                      icon: Iconsax.note,
-                      label: 'Deskripsi',
-                      value: supplier.description,
-                    ),
+                    _buildDetailItem(context, icon: Iconsax.note, label: 'Deskripsi', value: supplier.description),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Iconsax.call),
-                    label: const Text('Hubungi'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {
-                      // Call supplier
-                    },
-                  ),
+            // 3. Modifikasi Action Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Iconsax.message),
+                label: const Text('Hubungi via WhatsApp'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    icon: const Icon(Iconsax.message),
-                    label: const Text('Pesan'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {
-                      // Message supplier
-                    },
-                  ),
-                ),
-              ],
+                onPressed: () {
+                  // Panggil fungsi untuk membuka WhatsApp dengan nomor dari database
+                  _launchWhatsApp(context, supplier.phone);
+                },
+              ),
             ),
           ],
         ),
@@ -169,12 +132,7 @@ class SupplierDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDetailItem(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
+  Widget _buildDetailItem(BuildContext context, {required IconData icon, required String label, required String value}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -186,17 +144,9 @@ class SupplierDetailScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey,
-                      ),
-                ),
+                Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey)),
                 const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
+                Text(value, style: Theme.of(context).textTheme.bodyLarge),
               ],
             ),
           ),

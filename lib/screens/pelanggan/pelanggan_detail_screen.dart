@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:handycraft_app/core/models/pelanggan_model.dart';
 import 'package:handycraft_app/screens/pelanggan/edit_pelanggan_screen.dart';
 import 'package:iconsax/iconsax.dart';
-// 1. Import package url_launcher
 import 'package:url_launcher/url_launcher.dart';
 
 class PelangganDetailScreen extends StatelessWidget {
@@ -10,14 +9,11 @@ class PelangganDetailScreen extends StatelessWidget {
 
   const PelangganDetailScreen({super.key, required this.pelanggan});
 
-  // 2. Buat fungsi untuk membuka WhatsApp
   Future<void> _launchWhatsApp(BuildContext context, String phoneNumber) async {
-    // Format nomor telepon: ganti '0' di depan dengan '62'
     String formattedPhoneNumber = phoneNumber.trim();
     if (formattedPhoneNumber.startsWith('0')) {
       formattedPhoneNumber = '62${formattedPhoneNumber.substring(1)}';
     }
-    // Hapus karakter selain angka
     formattedPhoneNumber = formattedPhoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
 
     final Uri whatsappUrl = Uri.parse('https://wa.me/$formattedPhoneNumber');
@@ -25,7 +21,6 @@ class PelangganDetailScreen extends StatelessWidget {
     if (await canLaunchUrl(whatsappUrl)) {
       await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
     } else {
-      // Tampilkan notifikasi jika gagal membuka WhatsApp
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Tidak bisa membuka WhatsApp untuk nomor $phoneNumber')),
       );

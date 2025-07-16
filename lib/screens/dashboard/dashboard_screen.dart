@@ -15,6 +15,70 @@ import '../../core/providers/dashboard_provider.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
+
+  void _showDeleteConfirmationDialog(
+    BuildContext context,
+    String id,
+    bool isPenerimaan,
+    WidgetRef ref,
+  ) {
+    // Delay sedikit untuk menutup popup menu sebelumnya
+    Future.delayed(Duration.zero, () {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Konfirmasi Hapus'),
+          content: Text(
+            'Apakah Anda yakin ingin menghapus data ${isPenerimaan ? 'penerimaan' : 'pengeluaran'} ini?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context); // Tutup dialog
+                try {
+                  if (isPenerimaan) {
+                    await ref
+                        .read(penerimaanRepositoryProvider)
+                        .deletePenerimaan(id);
+                  } else {
+                    await ref
+                        .read(pengeluaranRepositoryProvider)
+                        .deletePengeluaran(id);
+                  }
+
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Data ${isPenerimaan ? 'penerimaan' : 'pengeluaran'} berhasil dihapus',
+                        ),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Gagal menghapus: ${e.toString()}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+              child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -424,7 +488,12 @@ class DashboardScreen extends ConsumerWidget {
                                 ),
                               ],
                             ),
-                            onTap: () => {},
+                            onTap: () => _showDeleteConfirmationDialog(
+                              context,
+                              transaction.id,
+                              true,
+                              ref,
+                            ),
                           ),
                         ],
                       ),
@@ -438,7 +507,7 @@ class DashboardScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Supplier',
+                            'Pelanggan',
                             style: textTheme.bodySmall?.copyWith(
                               color: secondaryTextColor,
                             ),
@@ -658,7 +727,12 @@ class DashboardScreen extends ConsumerWidget {
                                 ),
                               ],
                             ),
-                            onTap: () => {},
+                            onTap: () => _showDeleteConfirmationDialog(
+                              context,
+                              transaction.id,
+                              false,
+                              ref,
+                            ),
                           ),
                         ],
                       ),

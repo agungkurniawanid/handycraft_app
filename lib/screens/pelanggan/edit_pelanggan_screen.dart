@@ -4,21 +4,31 @@ import 'package:handycraft_app/core/models/pelanggan_model.dart';
 import 'package:handycraft_app/core/providers/pelanggan_provider.dart';
 import 'package:iconsax/iconsax.dart';
 
-// 1. Ubah menjadi ConsumerStatefulWidget
-class AddPelangganScreen extends ConsumerStatefulWidget {
-  const AddPelangganScreen({super.key});
+class EditPelangganScreen extends ConsumerStatefulWidget {
+  final Pelanggan pelanggan;
+  const EditPelangganScreen({super.key, required this.pelanggan});
 
   @override
-  ConsumerState<AddPelangganScreen> createState() => _AddPelangganScreenState();
+  ConsumerState<EditPelangganScreen> createState() => _EditPelangganScreenState();
 }
 
-class _AddPelangganScreenState extends ConsumerState<AddPelangganScreen> {
+class _EditPelangganScreenState extends ConsumerState<EditPelangganScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _addressController = TextEditingController();
-  final _descriptionController = TextEditingController();
+  late TextEditingController _nameController;
+  late TextEditingController _phoneController;
+  late TextEditingController _addressController;
+  late TextEditingController _descriptionController;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Isi controller dengan data pelanggan yang ada
+    _nameController = TextEditingController(text: widget.pelanggan.name);
+    _phoneController = TextEditingController(text: widget.pelanggan.phone);
+    _addressController = TextEditingController(text: widget.pelanggan.address);
+    _descriptionController = TextEditingController(text: widget.pelanggan.description);
+  }
 
   @override
   void dispose() {
@@ -29,15 +39,12 @@ class _AddPelangganScreenState extends ConsumerState<AddPelangganScreen> {
     super.dispose();
   }
 
-  // 2. Buat fungsi untuk menyimpan data
-  Future<void> _savePelanggan() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+  Future<void> _updatePelanggan() async {
+    if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
 
-    final newPelanggan = Pelanggan(
-      id: '', // ID akan digenerate oleh Firebase
+    final updatedPelanggan = Pelanggan(
+      id: widget.pelanggan.id, // Gunakan ID yang sudah ada
       name: _nameController.text.trim(),
       phone: _phoneController.text.trim(),
       address: _addressController.text.trim(),
@@ -45,39 +52,26 @@ class _AddPelangganScreenState extends ConsumerState<AddPelangganScreen> {
     );
 
     try {
-      final repository = ref.read(pelangganRepositoryProvider);
-      await repository.addPelanggan(newPelanggan);
-
+      await ref.read(pelangganRepositoryProvider).updatePelanggan(updatedPelanggan);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Pelanggan berhasil disimpan!'), backgroundColor: Colors.green),
-        );
-        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pelanggan berhasil diperbarui!'), backgroundColor: Colors.green));
+        Navigator.of(context).pop(); // Kembali ke halaman detail
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal menyimpan pelanggan: $e'), backgroundColor: Colors.red),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal memperbarui: $e'), backgroundColor: Colors.red));
       }
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Tambah Pelanggan', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-        centerTitle: true,
-        leading: IconButton(icon: const Icon(Iconsax.arrow_left_2), onPressed: () => Navigator.pop(context), splashRadius: 20),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('Edit Pelanggan'), centerTitle: true),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
@@ -91,13 +85,10 @@ class _AddPelangganScreenState extends ConsumerState<AddPelangganScreen> {
               const SizedBox(height: 16),
               TextFormField(controller: _descriptionController, decoration: const InputDecoration(labelText: 'Keterangan (Pesanan/Kebutuhan)', border: OutlineInputBorder(), prefixIcon: Icon(Iconsax.note_text), hintText: 'Contoh: Pesan meja makan dari kayu jati'), maxLines: 2, validator: (v) => v == null || v.isEmpty ? 'Keterangan tidak boleh kosong' : null),
               const SizedBox(height: 32),
-              // 3. Update tombol untuk memanggil _savePelanggan dan menampilkan loading
               ElevatedButton(
-                onPressed: _isLoading ? null : _savePelanggan,
+                onPressed: _isLoading ? null : _updatePelanggan,
                 style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                child: _isLoading
-                    ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
-                    : const Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Iconsax.save_2, size: 20), SizedBox(width: 8), Text('Simpan Pelanggan')]),
+                child: _isLoading ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3)) : const Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Iconsax.save_2, size: 20), SizedBox(width: 8), Text('Simpan Perubahan')]),
               ),
             ],
           ),

@@ -8,6 +8,7 @@ import 'package:handycraft_app/core/providers/theme_provider.dart';
 import 'package:handycraft_app/screens/dashboard/add_pengeluaran_gaji_screen.dart';
 import 'package:handycraft_app/screens/dashboard/add_pengeluaran_screen.dart';
 import 'package:handycraft_app/screens/dashboard/edit_penerimaan_screen.dart';
+import 'package:handycraft_app/screens/dashboard/edit_pengeluaran_gaji.dart';
 import 'package:handycraft_app/screens/dashboard/edit_pengeluaran_screen.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:handycraft_app/screens/dashboard/add_penerimaan_screen.dart';
@@ -20,64 +21,89 @@ class DashboardScreen extends ConsumerWidget {
   void _showDeleteConfirmationDialog(
     BuildContext context,
     String id,
-    bool isPenerimaan,
+    int isPenerimaan,
     WidgetRef ref,
   ) {
-    // Delay sedikit untuk menutup popup menu sebelumnya
-    Future.delayed(Duration.zero, () {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Konfirmasi Hapus'),
-          content: Text(
-            'Apakah Anda yakin ingin menghapus data ${isPenerimaan ? 'penerimaan' : 'pengeluaran'} ini?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Batal'),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.pop(context);
-                try {
-                  if (isPenerimaan) {
-                    await ref
-                        .read(penerimaanRepositoryProvider)
-                        .deletePenerimaan(id);
-                  } else {
-                    await ref
-                        .read(pengeluaranRepositoryProvider)
-                        .deletePengeluaran(id);
-                  }
-
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Data ${isPenerimaan ? 'penerimaan' : 'pengeluaran'} berhasil dihapus',
-                        ),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Gagal menghapus: ${e.toString()}'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                }
-              },
-              child: const Text('Hapus', style: TextStyle(color: Colors.red)),
-            ),
-          ],
+    // Remove Future.delayed as it's not necessary
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Konfirmasi Hapus'),
+        content: Text(
+          'Apakah Anda yakin ingin menghapus data ${_getTypeDescription(isPenerimaan)} ini?',
         ),
-      );
-    });
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => _confirmDelete(context, id, isPenerimaan, ref),
+            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getTypeDescription(int isPenerimaan) {
+    switch (isPenerimaan) {
+      case 1:
+        return 'penerimaan';
+      case 2:
+        return 'pengeluaran';
+      case 3:
+        return 'pengeluaran gaji karyawan';
+      default:
+        return '';
+    }
+  }
+
+  Future<void> _confirmDelete(
+    BuildContext context,
+    String id,
+    int isPenerimaan,
+    WidgetRef ref,
+  ) async {
+    Navigator.pop(context);
+
+    try {
+      switch (isPenerimaan) {
+        case 1:
+          await ref.read(penerimaanRepositoryProvider).deletePenerimaan(id);
+          break;
+        case 2:
+          await ref.read(pengeluaranRepositoryProvider).deletePengeluaran(id);
+          break;
+        case 3:
+          await ref
+              .read(pengeluaranGajiKaryawanRepositoryProvider)
+              .deletePengeluaranGajiKaryawan(id);
+          break;
+      }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Data ${_getTypeDescription(isPenerimaan)} berhasil dihapus',
+            ),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal menghapus: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -520,7 +546,7 @@ class DashboardScreen extends ConsumerWidget {
                             onTap: () => _showDeleteConfirmationDialog(
                               context,
                               transaction.id,
-                              true,
+                              1,
                               ref,
                             ),
                           ),
@@ -782,7 +808,7 @@ class DashboardScreen extends ConsumerWidget {
                             onTap: () => _showDeleteConfirmationDialog(
                               context,
                               transaction.id,
-                              false,
+                              2,
                               ref,
                             ),
                           ),
@@ -1466,7 +1492,16 @@ class DashboardScreen extends ConsumerWidget {
                                     ),
                                   ],
                                 ),
-                                onTap: () {},
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => EditPengeluaranGaji(
+                                        pengeluaranGajiId: transaction.id,
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                               PopupMenuItem(
                                 child: Row(
@@ -1488,7 +1523,7 @@ class DashboardScreen extends ConsumerWidget {
                                 onTap: () => _showDeleteConfirmationDialog(
                                   context,
                                   transaction.id,
-                                  false,
+                                  3,
                                   ref,
                                 ),
                               ),

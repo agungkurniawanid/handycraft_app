@@ -95,7 +95,9 @@ class PengeluaranGajiKaryawanRepository {
     });
   }
 
-  Future<PengeluaranGajiKaryawan?> getPengeluaranById(String id) async {
+  Future<PengeluaranGajiKaryawan?> getPengeluaranGajiKaryawanById(
+    String id,
+  ) async {
     final snapshot = await _dbRef
         .child('master_data/pengeluaran_gaji_karyawan')
         .child(id)
@@ -105,6 +107,4 @@ class PengeluaranGajiKaryawanRepository {
     }
     return null;
   }
-
-  /*******  b8fb4b81-9c39-4900-b038-3a20a190dfc9  *******/
 }

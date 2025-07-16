@@ -59,6 +59,7 @@ dependencies:
   persistent_bottom_nav_bar: ^6.2.1
   firebase_core: ^3.15.1
   firebase_database: ^11.3.9
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:

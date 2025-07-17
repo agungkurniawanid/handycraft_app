@@ -7,6 +7,9 @@ import 'package:handycraft_app/core/providers/pengeluaran_provider.dart';
 import 'package:handycraft_app/core/providers/theme_provider.dart';
 import 'package:handycraft_app/screens/dashboard/add_pengeluaran_gaji_screen.dart';
 import 'package:handycraft_app/screens/dashboard/add_pengeluaran_screen.dart';
+import 'package:handycraft_app/screens/dashboard/detail_penerimaan.dart';
+import 'package:handycraft_app/screens/dashboard/detail_pengeluaran.dart';
+import 'package:handycraft_app/screens/dashboard/detail_pengeluaran_gaji.dart';
 import 'package:handycraft_app/screens/dashboard/edit_penerimaan_screen.dart';
 import 'package:handycraft_app/screens/dashboard/edit_pengeluaran_gaji.dart';
 import 'package:handycraft_app/screens/dashboard/edit_pengeluaran_screen.dart';
@@ -421,7 +424,14 @@ class DashboardScreen extends ConsumerWidget {
             Row(
               children: [
                 GestureDetector(
-                  onTap: () => {},
+                  onTap: () => {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DetailPenerimaan(),
+                      ),
+                    ),
+                  },
                   child: Text(
                     'Lihat Semua',
                     style: textTheme.bodyMedium?.copyWith(
@@ -707,7 +717,14 @@ class DashboardScreen extends ConsumerWidget {
             Row(
               children: [
                 GestureDetector(
-                  onTap: () => {},
+                  onTap: () => {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DetailPengeluaran(),
+                      ),
+                    ),
+                  },
                   child: Text(
                     'Lihat Semua',
                     style: textTheme.bodyMedium?.copyWith(
@@ -1433,7 +1450,14 @@ class DashboardScreen extends ConsumerWidget {
                 Row(
                   children: [
                     GestureDetector(
-                      onTap: () => {},
+                      onTap: () => {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const DetailPengeluaranGaji(),
+                          ),
+                        ),
+                      },
                       child: Text(
                         'Lihat Semua',
                         style: textTheme.bodyMedium?.copyWith(

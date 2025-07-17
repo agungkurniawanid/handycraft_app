@@ -32,7 +32,6 @@ class _EditPenerimaanScreenState extends ConsumerState<EditPenerimaanScreen> {
   bool _isLoading = true;
   bool _isSaving = false;
   PenerimaanModel? _penerimaanData;
-  Product? _selectedProduct;
 
   @override
   void initState() {
@@ -146,7 +145,6 @@ class _EditPenerimaanScreenState extends ConsumerState<EditPenerimaanScreen> {
   void _handleProductChange(Product? selectedProduct) {
     if (selectedProduct != null) {
       setState(() {
-        _selectedProduct = selectedProduct;
         _selectedNamaTransaksiBahanBaku = selectedProduct.name;
         _hargaSatuanController.text = selectedProduct.price.toInt().toString();
         _satuanController.text = selectedProduct.unit;

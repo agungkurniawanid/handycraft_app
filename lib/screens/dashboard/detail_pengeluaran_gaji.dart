@@ -219,8 +219,7 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
   ) {
     final isSelected = _selectedFilter == filterType;
     final isMonthYear = filterType == 'bulan' || filterType == 'tahun';
-    final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
+    final orangeColor = Colors.orange; // Define orange color
 
     return Expanded(
       child: GestureDetector(
@@ -241,16 +240,9 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
           margin: const EdgeInsets.symmetric(horizontal: 4),
           decoration: BoxDecoration(
-            color: isSelected
-                ? theme.primaryColor.withOpacity(isDarkMode ? 0.3 : 0.2)
-                : Colors.transparent,
+            color: isSelected ? orangeColor : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: isSelected
-                  ? theme.primaryColor
-                  : Colors.grey.withOpacity(isDarkMode ? 0.5 : 0.3),
-              width: 1.5,
-            ),
+            border: Border.all(color: orangeColor, width: 1),
           ),
           child: Column(
             children: [
@@ -258,11 +250,7 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
                 label,
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
-                  color: isSelected
-                      ? theme.primaryColor
-                      : isDarkMode
-                      ? Colors.grey[300]
-                      : Colors.grey[700],
+                  color: isSelected ? Colors.white : orangeColor,
                 ),
               ),
               if (isMonthYear && isSelected)
@@ -274,7 +262,11 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
                       : _selectedYear != null
                       ? _selectedYear!.year.toString()
                       : DateTime.now().year.toString(),
-                  style: TextStyle(fontSize: 12, color: theme.primaryColor),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color:
+                        Colors.white, // White text for month/year when selected
+                  ),
                 ),
             ],
           ),

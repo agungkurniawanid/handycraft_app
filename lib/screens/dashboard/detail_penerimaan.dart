@@ -194,6 +194,7 @@ class _DetailPenerimaanState extends ConsumerState<DetailPenerimaan> {
   ) {
     final isSelected = _selectedFilter == filterType;
     final isMonthYear = filterType == 'bulan' || filterType == 'tahun';
+    final orangeColor = Colors.orange;
 
     return Expanded(
       child: GestureDetector(
@@ -214,15 +215,9 @@ class _DetailPenerimaanState extends ConsumerState<DetailPenerimaan> {
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
           margin: const EdgeInsets.symmetric(horizontal: 4),
           decoration: BoxDecoration(
-            color: isSelected
-                ? Theme.of(context).primaryColor.withOpacity(0.2)
-                : Colors.transparent,
+            color: isSelected ? orangeColor : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: isSelected
-                  ? Theme.of(context).primaryColor
-                  : Colors.grey.withOpacity(0.3),
-            ),
+            border: Border.all(color: orangeColor, width: 1),
           ),
           child: Column(
             children: [
@@ -230,9 +225,7 @@ class _DetailPenerimaanState extends ConsumerState<DetailPenerimaan> {
                 label,
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
-                  color: isSelected
-                      ? Theme.of(context).primaryColor
-                      : Colors.grey[700],
+                  color: isSelected ? Colors.white : orangeColor,
                 ),
               ),
               if (isMonthYear && isSelected)
@@ -244,10 +237,7 @@ class _DetailPenerimaanState extends ConsumerState<DetailPenerimaan> {
                       : _selectedYear != null
                       ? _selectedYear!.year.toString()
                       : DateTime.now().year.toString(),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).primaryColor,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.white),
                 ),
             ],
           ),

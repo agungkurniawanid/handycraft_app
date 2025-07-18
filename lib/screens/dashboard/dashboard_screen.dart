@@ -194,7 +194,10 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard HandyCraft', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
+        title: const Text(
+          'Dashboard HandyCraft',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange),
+        ),
         centerTitle: true,
         actions: [
           IconButton(
@@ -232,9 +235,9 @@ class DashboardScreen extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(
-          color: Colors.orange,
-        )),
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: Colors.orange),
+        ),
         error: (error, stackTrace) => Center(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -385,19 +388,31 @@ class DashboardScreen extends ConsumerWidget {
               Row(
                 children: [
                   ChoiceChip(
-                    label: const Text('Bulan'),
+                    label: Text(
+                      'Bulan',
+                      style: TextStyle(
+                        color: filterType == 'month' ? Colors.white : null,
+                      ),
+                    ),
                     selected: filterType == 'month',
                     onSelected: (_) =>
                         ref.read(selectedFilterTypeProvider.notifier).state =
                             'month',
+                    selectedColor: Colors.orange,
                   ),
                   const SizedBox(width: 8),
                   ChoiceChip(
-                    label: const Text('Tahun'),
+                    label: Text(
+                      'Tahun',
+                      style: TextStyle(
+                        color: filterType == 'year' ? Colors.white : null,
+                      ),
+                    ),
                     selected: filterType == 'year',
                     onSelected: (_) =>
                         ref.read(selectedFilterTypeProvider.notifier).state =
                             'year',
+                    selectedColor: Colors.orange,
                   ),
                   const Spacer(),
                   IconButton(
@@ -508,9 +523,8 @@ class DashboardScreen extends ConsumerWidget {
     BuildContext context,
   ) {
     return asyncPenerimaan.when(
-      loading: () => const Center(child: CircularProgressIndicator(
-        color: Colors.orange,
-      )),
+      loading: () =>
+          const Center(child: CircularProgressIndicator(color: Colors.orange)),
       error: (err, _) => Center(child: Text('Error: $err')),
       data: (penerimaanList) {
         if (penerimaanList.isEmpty) {
@@ -594,14 +608,15 @@ class DashboardScreen extends ConsumerWidget {
                     'Lihat Semua',
                     style: textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: Colors.blueAccent,
+                      color: Colors.orange,
                     ),
                   ),
                 ),
+                SizedBox(width: 10),
                 const Icon(
-                  Iconsax.arrow_right_1,
+                  Iconsax.arrow_right_25,
                   size: 20,
-                  color: Colors.blueAccent,
+                  color: Colors.orange,
                 ),
               ],
             ),
@@ -887,14 +902,15 @@ class DashboardScreen extends ConsumerWidget {
                     'Lihat Semua',
                     style: textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: Colors.blueAccent,
+                      color: Colors.orange,
                     ),
                   ),
                 ),
+                SizedBox(width: 10),
                 const Icon(
-                  Iconsax.arrow_right_1,
+                  Iconsax.arrow_right_25,
                   size: 20,
-                  color: Colors.blueAccent,
+                  color: Colors.orange,
                 ),
               ],
             ),
@@ -1142,9 +1158,10 @@ class DashboardScreen extends ConsumerWidget {
                   alignment: Alignment.centerRight,
                   child: ElevatedButton.icon(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Iconsax.close_circle),
-                    label: const Text('Tutup'),
+                    icon: const Icon(Iconsax.close_circle,color: Colors.white,),
+                    label: const Text('Tutup', style: TextStyle(color: Colors.white),),
                     style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -1208,9 +1225,10 @@ class DashboardScreen extends ConsumerWidget {
                   alignment: Alignment.centerRight,
                   child: ElevatedButton.icon(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Iconsax.close_circle),
-                    label: const Text('Tutup'),
+                    icon: const Icon(Iconsax.close_circle,color: Colors.white,),
+                    label: const Text('Tutup', style: TextStyle(color: Colors.white),),
                     style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -1524,9 +1542,10 @@ class DashboardScreen extends ConsumerWidget {
                   alignment: Alignment.centerRight,
                   child: ElevatedButton.icon(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Iconsax.close_circle),
-                    label: const Text('Tutup'),
+                    icon: const Icon(Iconsax.close_circle,color: Colors.white,),
+                    label: const Text('Tutup', style: TextStyle(color: Colors.white),),
                     style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -1582,9 +1601,8 @@ class DashboardScreen extends ConsumerWidget {
     }
 
     return asyncPengeluaranGaji.when(
-      loading: () => const Center(child: CircularProgressIndicator(
-        color: Colors.orange,
-      )),
+      loading: () =>
+          const Center(child: CircularProgressIndicator(color: Colors.orange)),
       error: (err, _) => Center(child: Text('Error: $err')),
       data: (pengeluaranGajiList) {
         if (pengeluaranGajiList.isEmpty) {
@@ -1628,14 +1646,15 @@ class DashboardScreen extends ConsumerWidget {
                         'Lihat Semua',
                         style: textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: Colors.blueAccent,
+                          color: Colors.orange,
                         ),
                       ),
                     ),
+                    SizedBox(width: 10),
                     const Icon(
-                      Iconsax.arrow_right_1,
+                      Iconsax.arrow_right_25,
                       size: 20,
-                      color: Colors.blueAccent,
+                      color: Colors.orange,
                     ),
                   ],
                 ),

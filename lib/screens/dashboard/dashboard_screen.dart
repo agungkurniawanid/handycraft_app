@@ -4,6 +4,7 @@ import 'package:handycraft_app/core/models/penerimaan_model.dart';
 import 'package:handycraft_app/core/models/pengeluaran_model.dart';
 import 'package:handycraft_app/core/providers/penerimaan_provider.dart';
 import 'package:handycraft_app/core/providers/pengeluaran_provider.dart';
+import 'package:handycraft_app/core/providers/summary_total_provider.dart';
 import 'package:handycraft_app/core/providers/theme_provider.dart';
 import 'package:handycraft_app/screens/dashboard/add_pengeluaran_gaji_screen.dart';
 import 'package:handycraft_app/screens/dashboard/add_pengeluaran_screen.dart';
@@ -16,6 +17,7 @@ import 'package:handycraft_app/screens/dashboard/edit_pengeluaran_screen.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:handycraft_app/screens/dashboard/add_penerimaan_screen.dart';
 import 'package:intl/intl.dart';
+import 'package:month_picker_dialog/month_picker_dialog.dart';
 import '../../core/providers/dashboard_provider.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -27,7 +29,6 @@ class DashboardScreen extends ConsumerWidget {
     int isPenerimaan,
     WidgetRef ref,
   ) {
-    // Remove Future.delayed as it's not necessary
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -47,6 +48,35 @@ class DashboardScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _selectYear(BuildContext context, WidgetRef ref) async {
+    final initialDate = ref.read(selectedDateProvider);
+    final DateTime? picked = await showDialog<DateTime>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Pilih Tahun'),
+          content: SizedBox(
+            width: 300,
+            height: 300,
+            child: YearPicker(
+              firstDate: DateTime(2000),
+              lastDate: DateTime(2100),
+              initialDate: initialDate,
+              selectedDate: initialDate,
+              onChanged: (DateTime dateTime) {
+                Navigator.pop(context, dateTime);
+              },
+            ),
+          ),
+        );
+      },
+    );
+
+    if (picked != null) {
+      ref.read(selectedDateProvider.notifier).state = picked;
+    }
   }
 
   String _getTypeDescription(int isPenerimaan) {
@@ -109,6 +139,37 @@ class DashboardScreen extends ConsumerWidget {
     }
   }
 
+  String _getMonthYearText(DateTime date) {
+    final monthNames = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ];
+    return '${monthNames[date.month - 1]} ${date.year}';
+  }
+
+  Future<void> _selectMonth(BuildContext context, WidgetRef ref) async {
+    final selected = ref.read(selectedDateProvider);
+    final DateTime? picked = await showMonthPicker(
+      context: context,
+      initialDate: selected,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      ref.read(selectedDateProvider.notifier).state = picked;
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -119,6 +180,9 @@ class DashboardScreen extends ConsumerWidget {
     final pengeluaranGajiAsync = ref.watch(
       pengeluaranGajiKaryawanStreamProvider,
     );
+    final totalPenerimaan = ref.watch(totalPenerimaanProvider);
+    final totalPengeluaran = ref.watch(totalPengeluaranProvider);
+    final income = ref.watch(totalPenerimaanProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -140,16 +204,16 @@ class DashboardScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                _buildSummaryCard(context, income: 1625000, expense: 1500000),
+                _buildSummaryCard(
+                  context,
+                  ref,
+                  income: totalPenerimaan,
+                  expense: totalPengeluaran,
+                ),
                 const SizedBox(height: 16),
                 _buildActionButtons(context),
                 const SizedBox(height: 20),
-                _buildProfitCard(
-                  context,
-                  profit: 125000,
-                  isProfit: true,
-                  income: 1625000,
-                ),
+                _buildProfitCard(context, ref, income: income),
                 const SizedBox(height: 20),
                 _buildPenerimaanList(penerimaanAsync, ref, context),
                 const SizedBox(height: 20),
@@ -175,11 +239,18 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   Widget _buildSummaryCard(
-    BuildContext context, {
+    BuildContext context,
+    WidgetRef ref, {
     required double income,
     required double expense,
   }) {
     final theme = Theme.of(context);
+    final selectedDate = ref.watch(selectedDateProvider);
+    final hasPenerimaanData = ref.watch(filteredPenerimaanProvider).isNotEmpty;
+    final hasPengeluaranData =
+        ref.watch(filteredPengeluaranProvider).isNotEmpty ||
+        ref.watch(filteredPengeluaranGajiProvider).isNotEmpty;
+
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -191,44 +262,64 @@ class DashboardScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Ringkasan Bulan Ini',
+                  'Ringkasan ${_getMonthYearText(selectedDate)}',
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Icon(Iconsax.calendar, color: theme.colorScheme.primary),
+                IconButton(
+                  icon: Icon(
+                    Iconsax.calendar,
+                    color: theme.colorScheme.primary,
+                  ),
+                  onPressed: () => _selectMonth(context, ref),
+                  tooltip: 'Pilih Bulan dan Tahun',
+                ),
               ],
             ),
             const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Expanded(
-                  child: _buildFinancialItem(
-                    context,
-                    title: 'Penerimaan',
-                    amount: income,
-                    icon: Iconsax.arrow_down5,
-                    color: Colors.green,
+            if (!hasPenerimaanData && !hasPengeluaranData)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Text(
+                  'Tidak ada transaksi pada periode ini',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.6),
                   ),
                 ),
-                Container(
-                  height: 60,
-                  width: 1.2,
-                  color: theme.dividerColor,
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
-                ),
-                Expanded(
-                  child: _buildFinancialItem(
-                    context,
-                    title: 'Pengeluaran',
-                    amount: expense,
-                    icon: Iconsax.arrow_up_15,
-                    color: Colors.red,
+              )
+            else
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: _buildFinancialItem(
+                      context,
+                      title: 'Penerimaan',
+                      amount: income,
+                      icon: Iconsax.arrow_down5,
+                      color: Colors.green,
+                      isEmpty: !hasPenerimaanData,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                  Container(
+                    height: 60,
+                    width: 1.2,
+                    color: theme.dividerColor,
+                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                  ),
+                  Expanded(
+                    child: _buildFinancialItem(
+                      context,
+                      title: 'Pengeluaran',
+                      amount: expense,
+                      icon: Iconsax.arrow_up_15,
+                      color: Colors.red,
+                      isEmpty: !hasPengeluaranData,
+                    ),
+                  ),
+                ],
+              ),
           ],
         ),
       ),
@@ -236,13 +327,21 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   Widget _buildProfitCard(
-    BuildContext context, {
-    required double profit,
-    required bool isProfit,
+    BuildContext context,
+    WidgetRef ref, {
     required double income,
   }) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
+    final filterType = ref.watch(selectedFilterTypeProvider);
+    final profit = ref.watch(totalProfitProvider);
+    final isProfit = profit >= 0;
+
+    final hasData =
+        ref.watch(filteredPenerimaanProvider).isNotEmpty ||
+        ref.watch(filteredPengeluaranProvider).isNotEmpty ||
+        ref.watch(filteredPengeluaranGajiProvider).isNotEmpty;
+
     final cardColor = isProfit
         ? Colors.green.withOpacity(isDarkMode ? 0.2 : 0.1)
         : Colors.red.withOpacity(isDarkMode ? 0.2 : 0.1);
@@ -250,9 +349,11 @@ class DashboardScreen extends ConsumerWidget {
         ? (isDarkMode ? Colors.green.shade300 : Colors.green.shade700)
         : (isDarkMode ? Colors.red.shade300 : Colors.red.shade700);
     final icon = isProfit ? Iconsax.chart_success : Iconsax.chart_fail;
-    final formattedProfit = _formatCurrency(profit.abs());
+    final formattedProfit = hasData ? _formatCurrency(profit.abs()) : 'Rp 0';
 
-    final percentage = income > 0 ? (profit.abs() / income * 100) : 0.0;
+    final percentage = hasData && income > 0
+        ? (profit.abs() / income * 100)
+        : 0.0;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -273,6 +374,39 @@ class DashboardScreen extends ConsumerWidget {
             children: [
               Row(
                 children: [
+                  ChoiceChip(
+                    label: const Text('Bulan'),
+                    selected: filterType == 'month',
+                    onSelected: (_) =>
+                        ref.read(selectedFilterTypeProvider.notifier).state =
+                            'month',
+                  ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Text('Tahun'),
+                    selected: filterType == 'year',
+                    onSelected: (_) =>
+                        ref.read(selectedFilterTypeProvider.notifier).state =
+                            'year',
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: Icon(
+                      Iconsax.calendar,
+                      color: theme.colorScheme.primary,
+                      size: 20,
+                    ),
+                    onPressed: () => filterType == 'month'
+                        ? _selectMonth(context, ref)
+                        : _selectYear(context, ref),
+                    tooltip:
+                        'Pilih ${filterType == 'month' ? 'Bulan' : 'Tahun'}',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
@@ -281,11 +415,15 @@ class DashboardScreen extends ConsumerWidget {
                           : Colors.red.withOpacity(0.2),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(icon, color: textColor, size: 24),
+                    child: Icon(
+                      icon,
+                      color: hasData ? textColor : textColor.withOpacity(0.5),
+                      size: 24,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    'Laba/Rugi Bulan Ini',
+                    'Laba/Rugi ${filterType == 'year' ? 'Tahun' : 'Bulan'} Ini',
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: theme.colorScheme.onSurface.withOpacity(0.8),
@@ -294,51 +432,59 @@ class DashboardScreen extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 20),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    formattedProfit,
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: textColor,
-                      fontSize: 28,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  if (income > 0)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: textColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            isProfit
-                                ? Iconsax.arrow_up_2
-                                : Iconsax.arrow_down_1,
-                            size: 16,
-                            color: textColor,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${percentage.toStringAsFixed(1)}%',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: textColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
+              Text(
+                formattedProfit,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: hasData ? textColor : textColor.withOpacity(0.5),
+                  fontSize: 28,
+                ),
               ),
+              const SizedBox(height: 8),
+              if (!hasData)
+                Text(
+                  'Tidak ada transaksi pada periode ini',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  ),
+                )
+              else if (income > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: textColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isProfit ? Iconsax.arrow_up_2 : Iconsax.arrow_down_1,
+                        size: 16,
+                        color: textColor,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${percentage.toStringAsFixed(1)}%',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: textColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Text(
+                  '0%',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: textColor.withOpacity(0.5),
+                  ),
+                ),
             ],
           ),
         ),
@@ -1148,7 +1294,6 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  // Method navigasi untuk penerimaan
   void _navigateToPenerimaan(BuildContext context) {
     Navigator.push(
       context,
@@ -1156,7 +1301,6 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  // Dialog untuk pilihan pengeluaran (tetap sama)
   void _showExpenseTypeDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -1281,20 +1425,25 @@ class DashboardScreen extends ConsumerWidget {
     required double amount,
     required IconData icon,
     required Color color,
+    bool isEmpty = false,
   }) {
     final theme = Theme.of(context);
-    final formattedAmount = _formatCurrency(amount);
+    final formattedAmount = isEmpty ? 'Rp 0' : _formatCurrency(amount);
+
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color, size: 20),
+            Icon(icon, color: color.withOpacity(isEmpty ? 0.5 : 1.0), size: 20),
             const SizedBox(width: 8),
             Text(
               title,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w500,
+                color: isEmpty
+                    ? theme.colorScheme.onSurface.withOpacity(0.5)
+                    : null,
               ),
             ),
           ],
@@ -1304,6 +1453,9 @@ class DashboardScreen extends ConsumerWidget {
           formattedAmount,
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
+            color: isEmpty
+                ? theme.colorScheme.onSurface.withOpacity(0.5)
+                : null,
           ),
         ),
       ],

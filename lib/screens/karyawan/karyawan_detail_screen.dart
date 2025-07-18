@@ -35,16 +35,24 @@ class KaryawanDetailScreen extends ConsumerWidget {
                 builder: (context) => AlertDialog(
                   title: const Text('Hapus Karyawan'),
                   content: const Text(
-                      'Apakah Anda yakin ingin menghapus karyawan ini?'),
+                    'Apakah Anda yakin ingin menghapus karyawan ini?',
+                  ),
                   actions: [
                     TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        foregroundColor: Colors.white,
+                      ),
                       onPressed: () => Navigator.pop(context, false),
                       child: const Text('Batal'),
                     ),
                     TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                      ),
                       onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Hapus',
-                          style: TextStyle(color: Colors.red)),
+                      child: const Text('Hapus'),
                     ),
                   ],
                 ),
@@ -59,9 +67,9 @@ class KaryawanDetailScreen extends ConsumerWidget {
                   }
                 } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e')),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('Error: $e')));
                   }
                 }
               }
@@ -81,11 +89,7 @@ class KaryawanDetailScreen extends ConsumerWidget {
                   color: Colors.red.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Iconsax.people,
-                  size: 40,
-                  color: Colors.red,
-                ),
+                child: const Icon(Iconsax.people, size: 40, color: Colors.red),
               ),
             ),
             const SizedBox(height: 24),
@@ -154,15 +158,12 @@ class KaryawanDetailScreen extends ConsumerWidget {
               children: [
                 Text(
                   label,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
+                Text(value, style: Theme.of(context).textTheme.bodyLarge),
               ],
             ),
           ),

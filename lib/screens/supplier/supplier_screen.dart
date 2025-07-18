@@ -14,7 +14,8 @@ class SupplierScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Data Supplier'),
+        title: const Text('Data Supplier', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
+        centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Iconsax.add),
@@ -28,7 +29,9 @@ class SupplierScreen extends ConsumerWidget {
         ],
       ),
       body: suppliersAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: CircularProgressIndicator(
+          color: Colors.orange,
+        )),
         error: (err, _) => Center(child: Text('Error: $err')),
         data: (suppliers) {
           if (suppliers.isEmpty) {

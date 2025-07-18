@@ -10,14 +10,41 @@ class SplashScreen extends ConsumerStatefulWidget {
 }
 
 class _SplashScreenState extends ConsumerState<SplashScreen> {
+  double _progressValue = 0.0;
+
   @override
   void initState() {
     super.initState();
+    _startProgressAnimation();
     _navigateToDashboard();
   }
 
+  void _startProgressAnimation() {
+    const totalDuration = Duration(seconds: 3);
+    const frameRate = Duration(milliseconds: 30);
+    final totalFrames = totalDuration.inMilliseconds ~/ frameRate.inMilliseconds;
+
+    var frameCount = 0;
+    _progressValue = 0.0;
+
+    void updateProgress() {
+      if (mounted) {
+        setState(() {
+          frameCount++;
+          _progressValue = frameCount / totalFrames;
+        });
+
+        if (frameCount < totalFrames) {
+          Future.delayed(frameRate, updateProgress);
+        }
+      }
+    }
+
+    Future.delayed(frameRate, updateProgress);
+  }
+
   Future<void> _navigateToDashboard() async {
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 4));
     if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const PinScreen()),
@@ -28,9 +55,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+    final primaryColor = Colors.orange;
+
     return Scaffold(
-      backgroundColor: theme.colorScheme.primary,
+      backgroundColor: Colors.white,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -40,7 +68,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.onPrimary,
+                  color: primaryColor,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -53,7 +81,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 child: const Icon(
                   Icons.account_balance_wallet,
                   size: 80,
-                  color: Colors.orange,
+                  color: Colors.white,
                 ),
               ),
             ),
@@ -61,7 +89,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 500),
               style: theme.textTheme.headlineMedium!.copyWith(
-                color: theme.colorScheme.onPrimary,
+                color: primaryColor,
                 fontWeight: FontWeight.bold,
                 shadows: [
                   Shadow(
@@ -80,14 +108,27 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               child: Text(
                 'Keuangan UMKM Perkayuan',
                 style: theme.textTheme.titleMedium!.copyWith(
-                  color: theme.colorScheme.onPrimary.withOpacity(0.8),
+                  color: Colors.black.withOpacity(0.8),
                 ),
               ),
             ),
             const SizedBox(height: 50),
-            CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(
-                theme.colorScheme.onPrimary,
+            SizedBox(
+              width: 200,
+              child: LinearProgressIndicator(
+                value: _progressValue,
+                backgroundColor: Colors.grey[300],
+                valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                minHeight: 8,
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              '${(_progressValue * 100).toStringAsFixed(0)}%',
+              style: TextStyle(
+                color: primaryColor,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ],

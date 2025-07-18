@@ -16,6 +16,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
   String _enteredPin = "";
   bool _isError = false;
   bool _isLoading = false;
+  final Color primaryColor = Colors.orange; 
 
   void _onNumberPressed(String number) {
     if (_enteredPin.length < 6) {
@@ -74,7 +75,6 @@ class _PinScreenState extends ConsumerState<PinScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
-    final primaryColor = theme.colorScheme.primary;
     final backgroundColor = isDarkMode
         ? Colors.grey.shade900
         : Colors.grey.shade50;
@@ -123,6 +123,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.2,
+                    color: primaryColor, // Added primary color to text
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -139,13 +140,16 @@ class _PinScreenState extends ConsumerState<PinScreen> {
                       'Masukkan PIN Anda',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
+                        color: primaryColor, // Added primary color to text
                       ),
                     ),
                     const SizedBox(height: 20),
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 200),
                       child: _isLoading
-                          ? const CircularProgressIndicator()
+                          ? CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                            )
                           : SizedBox(
                               height: 20,
                               child: Row(
@@ -226,6 +230,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
                     _PinBackButton(
                       onPressed: _onBackspacePressed,
                       isActive: _enteredPin.isNotEmpty && !_isLoading,
+                      primaryColor: primaryColor,
                     ),
                   ],
                 ),
@@ -262,9 +267,10 @@ class _PinNumberButton extends StatelessWidget {
           child: Center(
             child: Text(
               number,
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w500),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: primaryColor, // Added primary color to number buttons
+                  ),
             ),
           ),
         ),
@@ -276,8 +282,13 @@ class _PinNumberButton extends StatelessWidget {
 class _PinBackButton extends StatelessWidget {
   final VoidCallback onPressed;
   final bool isActive;
+  final Color primaryColor;
 
-  const _PinBackButton({required this.onPressed, required this.isActive});
+  const _PinBackButton({
+    required this.onPressed,
+    required this.isActive,
+    required this.primaryColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -293,7 +304,7 @@ class _PinBackButton extends StatelessWidget {
               Iconsax.back_square,
               size: 24,
               color: isActive
-                  ? Theme.of(context).colorScheme.onSurface
+                  ? primaryColor // Changed to primary color
                   : Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
             ),
           ),

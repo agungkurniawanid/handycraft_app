@@ -19,20 +19,11 @@ class KaryawanScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Data Karyawan'),
-        actions: [
-          IconButton(
-            icon: const Icon(Iconsax.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AddKaryawanScreen(),
-                ),
-              );
-            },
-          ),
-        ],
+        title: const Text(
+          'Data Karyawan',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange),
+        ),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -42,7 +33,7 @@ class KaryawanScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(16),
               child: _buildSectionHeader(
                 context,
-                title: 'Data Karyawan',
+                title: 'Daftar Karyawan',
                 onAddPressed: () {
                   Navigator.push(
                     context,
@@ -54,7 +45,9 @@ class KaryawanScreen extends ConsumerWidget {
               ),
             ),
             karyawanAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(
+                child: CircularProgressIndicator(color: Colors.orange),
+              ),
               error: (err, _) => Center(child: Text('Error: $err')),
               data: (karyawans) {
                 if (karyawans.isEmpty) {
@@ -64,7 +57,9 @@ class KaryawanScreen extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
                     children: karyawans
-                        .map((karyawan) => _buildKaryawanCard(context, karyawan))
+                        .map(
+                          (karyawan) => _buildKaryawanCard(context, karyawan),
+                        )
                         .toList(),
                   ),
                 );
@@ -89,7 +84,9 @@ class KaryawanScreen extends ConsumerWidget {
               ),
             ),
             honorAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(
+                child: CircularProgressIndicator(color: Colors.orange),
+              ),
               error: (err, _) => Center(child: Text('Error: $err')),
               data: (honors) {
                 if (honors.isEmpty) {
@@ -98,7 +95,9 @@ class KaryawanScreen extends ConsumerWidget {
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
-                    children: honors.map((honor) => _buildHonorCard(context, honor, ref)).toList(),
+                    children: honors
+                        .map((honor) => _buildHonorCard(context, honor, ref))
+                        .toList(),
                   ),
                 );
               },
@@ -119,15 +118,15 @@ class KaryawanScreen extends ConsumerWidget {
       children: [
         Text(
           title,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         IconButton(
           icon: Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
+              color: Colors.orange,
               shape: BoxShape.circle,
             ),
             child: const Icon(Iconsax.add, color: Colors.white, size: 20),
@@ -151,26 +150,22 @@ class KaryawanScreen extends ConsumerWidget {
                 color: Colors.grey.shade100,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Iconsax.people,
-                size: 40,
-                color: Colors.red,
-              ),
+              child: const Icon(Iconsax.people, size: 40, color: Colors.red),
             ),
             const SizedBox(height: 15),
             Text(
               'Belum Ada Data Karyawan',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade700,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade700,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'Tambahkan karyawan baru untuk memulai',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey.shade500,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade500),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 15),
@@ -219,26 +214,22 @@ class KaryawanScreen extends ConsumerWidget {
                 color: Colors.grey.shade100,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Iconsax.money,
-                size: 40,
-                color: Colors.orange,
-              ),
+              child: const Icon(Iconsax.money, size: 40, color: Colors.orange),
             ),
             const SizedBox(height: 15),
             Text(
               'Belum Ada Daftar Honor',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade700,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade700,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'Tambahkan daftar honor baru untuk memulai',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey.shade500,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade500),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
@@ -291,10 +282,7 @@ class KaryawanScreen extends ConsumerWidget {
         title: Text(karyawan.name),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(karyawan.phone),
-            Text('Status: ${karyawan.status}'),
-          ],
+          children: [Text(karyawan.phone), Text('Status: ${karyawan.status}')],
         ),
         trailing: const Icon(Iconsax.arrow_right_3),
         onTap: () {
@@ -403,10 +391,7 @@ class KaryawanScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Gaji: Rp${honor.gaji.toStringAsFixed(0).replaceAllMapped(
-                    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                    (match) => '${match[1]}.',
-                  )}',
+              'Gaji: Rp${honor.gaji.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (match) => '${match[1]}.')}',
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
@@ -427,10 +412,18 @@ class KaryawanScreen extends ConsumerWidget {
         content: const Text('Apakah Anda yakin ingin menghapus honor ini?'),
         actions: [
           TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () => Navigator.pop(context),
             child: const Text('Batal'),
           ),
           TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () async {
               Navigator.pop(context);
               try {
@@ -455,10 +448,7 @@ class KaryawanScreen extends ConsumerWidget {
                 }
               }
             },
-            child: const Text(
-              'Hapus',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Hapus'),
           ),
         ],
       ),

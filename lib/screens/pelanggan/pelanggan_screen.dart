@@ -17,16 +17,24 @@ class PelangganScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Data Pelanggan'),
+        title: const Text('Data Pelanggan', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
+        centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Iconsax.add),
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AddPelangganScreen())),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AddPelangganScreen(),
+              ),
+            ),
           ),
         ],
       ),
       body: pelanggansAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: Colors.orange),
+        ),
         error: (err, _) => Center(child: Text('Error: $err')),
         data: (pelanggans) {
           if (pelanggans.isEmpty) {
@@ -40,18 +48,32 @@ class PelangganScreen extends ConsumerWidget {
               return Card(
                 elevation: 2,
                 margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: ListTile(
                   leading: Container(
                     padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: Colors.purple.withOpacity(0.1), shape: BoxShape.circle),
-                    child: const Icon(Iconsax.profile_2user, color: Colors.purple),
+                    decoration: BoxDecoration(
+                      color: Colors.purple.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Iconsax.profile_2user,
+                      color: Colors.purple,
+                    ),
                   ),
                   title: Text(pelanggan.name),
                   subtitle: Text(pelanggan.phone),
                   // 2. Ganti trailing icon dengan menu opsi
                   trailing: _buildOptionsMenu(context, ref, pelanggan),
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => PelangganDetailScreen(pelanggan: pelanggan))),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          PelangganDetailScreen(pelanggan: pelanggan),
+                    ),
+                  ),
                 ),
               );
             },
@@ -62,12 +84,21 @@ class PelangganScreen extends ConsumerWidget {
   }
 
   // 3. Widget untuk membuat menu opsi (Edit & Hapus)
-  Widget _buildOptionsMenu(BuildContext context, WidgetRef ref, Pelanggan pelanggan) {
+  Widget _buildOptionsMenu(
+    BuildContext context,
+    WidgetRef ref,
+    Pelanggan pelanggan,
+  ) {
     return PopupMenuButton<String>(
       icon: const Icon(Iconsax.more),
       onSelected: (value) {
         if (value == 'edit') {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => EditPelangganScreen(pelanggan: pelanggan)));
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EditPelangganScreen(pelanggan: pelanggan),
+            ),
+          );
         } else if (value == 'delete') {
           _showDeleteConfirmationDialog(
             context,
@@ -75,23 +106,76 @@ class PelangganScreen extends ConsumerWidget {
             content: 'Anda yakin ingin menghapus "${pelanggan.name}"?',
             onConfirm: () async {
               try {
-                await ref.read(pelangganRepositoryProvider).deletePelanggan(pelanggan.id);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pelanggan berhasil dihapus'), backgroundColor: Colors.green));
+                await ref
+                    .read(pelangganRepositoryProvider)
+                    .deletePelanggan(pelanggan.id);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Pelanggan berhasil dihapus'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal menghapus: $e'), backgroundColor: Colors.red));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Gagal menghapus: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
               }
             },
           );
         }
       },
       itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-        const PopupMenuItem<String>(value: 'edit', child: ListTile(leading: Icon(Iconsax.edit), title: Text('Edit'))),
-        const PopupMenuItem<String>(value: 'delete', child: ListTile(leading: Icon(Iconsax.trash, color: Colors.red), title: Text('Hapus', style: TextStyle(color: Colors.red)))),
+        const PopupMenuItem<String>(
+          value: 'edit',
+          child: ListTile(leading: Icon(Iconsax.edit), title: Text('Edit')),
+        ),
+        const PopupMenuItem<String>(
+          value: 'delete',
+          child: ListTile(
+            leading: Icon(Iconsax.trash, color: Colors.red),
+            title: Text('Hapus', style: TextStyle(color: Colors.red)),
+          ),
+        ),
       ],
     );
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context, {required String title, required String content, required VoidCallback onConfirm}) {
-    showDialog(context: context, builder: (BuildContext dialogContext) => AlertDialog(title: Text(title), content: Text(content), actions: <Widget>[TextButton(child: const Text('Batal'), onPressed: () => Navigator.of(dialogContext).pop()), TextButton(style: TextButton.styleFrom(foregroundColor: Colors.red), child: const Text('Hapus'), onPressed: () { onConfirm(); Navigator.of(dialogContext).pop(); })]));
+  void _showDeleteConfirmationDialog(
+    BuildContext context, {
+    required String title,
+    required String content,
+    required VoidCallback onConfirm,
+  }) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: <Widget>[
+          TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Batal'),
+            onPressed: () => Navigator.of(dialogContext).pop(),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Hapus'),
+            onPressed: () {
+              onConfirm();
+              Navigator.of(dialogContext).pop();
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

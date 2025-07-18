@@ -34,12 +34,20 @@ class DashboardScreen extends ConsumerWidget {
         ),
         actions: [
           TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () => Navigator.pop(context),
             child: const Text('Batal'),
           ),
           TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () => _confirmDelete(context, id, isPenerimaan, ref),
-            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+            child: const Text('Hapus'),
           ),
         ],
       ),
@@ -119,7 +127,7 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard HandyCraft'),
+        title: const Text('Dashboard HandyCraft', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
         centerTitle: true,
         actions: [
           IconButton(
@@ -157,7 +165,9 @@ class DashboardScreen extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: CircularProgressIndicator(
+          color: Colors.orange,
+        )),
         error: (error, stackTrace) => Center(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -349,7 +359,9 @@ class DashboardScreen extends ConsumerWidget {
     BuildContext context,
   ) {
     return asyncPenerimaan.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(child: CircularProgressIndicator(
+        color: Colors.orange,
+      )),
       error: (err, _) => Center(child: Text('Error: $err')),
       data: (penerimaanList) {
         if (penerimaanList.isEmpty) {
@@ -1401,7 +1413,9 @@ class DashboardScreen extends ConsumerWidget {
     }
 
     return asyncPengeluaranGaji.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(child: CircularProgressIndicator(
+        color: Colors.orange,
+      )),
       error: (err, _) => Center(child: Text('Error: $err')),
       data: (pengeluaranGajiList) {
         if (pengeluaranGajiList.isEmpty) {

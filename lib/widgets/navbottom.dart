@@ -50,14 +50,14 @@ class MainNavigation extends StatelessWidget {
       PersistentBottomNavBarItem(
         icon: const Icon(Iconsax.home),
         title: "Dashboard",
-        activeColorPrimary: Colors.blue,
+        activeColorPrimary: Colors.orange,
         activeColorSecondary: Colors.white,
         inactiveColorPrimary: Colors.grey,
       ),
       PersistentBottomNavBarItem(
         icon: const Icon(Iconsax.box),
         title: "Produk",
-        activeColorPrimary: Colors.green,
+        activeColorPrimary: Colors.orange,
         activeColorSecondary: Colors.white,
         inactiveColorPrimary: Colors.grey,
       ),
@@ -71,14 +71,14 @@ class MainNavigation extends StatelessWidget {
       PersistentBottomNavBarItem(
         icon: const Icon(Iconsax.profile_2user),
         title: "Pelanggan",
-        activeColorPrimary: Colors.purple,
+        activeColorPrimary: Colors.orange,
         activeColorSecondary: Colors.white,
         inactiveColorPrimary: Colors.grey,
       ),
       PersistentBottomNavBarItem(
         icon: const Icon(Iconsax.people),
         title: "Karyawan",
-        activeColorPrimary: Colors.red,
+        activeColorPrimary: Colors.orange,
         activeColorSecondary: Colors.white,
         inactiveColorPrimary: Colors.grey,
       ),

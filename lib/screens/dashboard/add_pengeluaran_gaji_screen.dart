@@ -25,6 +25,8 @@ class _AddPengeluaranGajiScreenState
   final TextEditingController _statusKaryawanController =
       TextEditingController();
   final TextEditingController _tipeSatuanController = TextEditingController();
+  final TextEditingController _jumlahHariOrBarangController =
+      TextEditingController();
 
   String? _selectedKaryawanId;
   String? _selectedKaryawanName;
@@ -37,6 +39,7 @@ class _AddPengeluaranGajiScreenState
   void initState() {
     super.initState();
     _jumlahGajiController.addListener(_updateTotal);
+    _jumlahHariOrBarangController.addListener(_updateTotal);
     _tanggalController.text = DateFormat('dd/MM/yyyy').format(DateTime.now());
     _searchController.addListener(() {
       setState(() {});
@@ -44,10 +47,18 @@ class _AddPengeluaranGajiScreenState
   }
 
   void _updateTotal() {
-    // Hapus .toStringAsFixed(0) karena kita sudah format dengan NumberFormat
     final jumlahGaji =
         num.tryParse(_jumlahGajiController.text.replaceAll(',', '')) ?? 0;
-    _totalController.text = NumberFormat('#,###').format(jumlahGaji);
+    final jumlahHariOrBarang =
+        num.tryParse(_jumlahHariOrBarangController.text) ?? 0;
+
+    final total = jumlahGaji * jumlahHariOrBarang;
+    _totalController.text = NumberFormat('#,###').format(total);
+  }
+
+  String _getQuantityLabel() {
+    final status = _statusKaryawanController.text;
+    return status == 'Karyawan Tetap' ? 'Jumlah Hari' : 'Jumlah Barang (pcs)';
   }
 
   Future<void> _submitForm() async {
@@ -56,17 +67,16 @@ class _AddPengeluaranGajiScreenState
     setState(() => _isLoading = true);
 
     try {
-      // Konversi tanggal dari format UI (dd/MM/yyyy) ke ISO (yyyy-MM-dd)
       final parsedDate = DateFormat(
         'dd/MM/yyyy',
       ).parse(_tanggalController.text);
-      final isoDate = DateFormat('yyyy-MM-dd').format(parsedDate); // Format ISO
+      final isoDate = DateFormat('yyyy-MM-dd').format(parsedDate);
 
       final newPengeluaran = PengeluaranGajiKaryawan(
         id: '',
         karyawanId: _selectedKaryawanId ?? '',
         namaKaryawan: _selectedKaryawanName ?? '',
-        tanggalPengeluaranGaji: isoDate, // Gunakan format ISO di sini
+        tanggalPengeluaranGaji: isoDate,
         jumlahGaji: num.parse(_jumlahGajiController.text.replaceAll(',', '')),
         total: num.parse(_totalController.text.replaceAll(',', '')),
         keterangan: _keteranganController.text,
@@ -76,6 +86,7 @@ class _AddPengeluaranGajiScreenState
         tipeSatuan: _tipeSatuanController.text.isNotEmpty
             ? _tipeSatuanController.text
             : null,
+        jumlahHariOrBarang: num.parse(_jumlahHariOrBarangController.text),
       );
 
       final repository = ref.read(pengeluaranGajiKaryawanRepositoryProvider);
@@ -173,13 +184,9 @@ class _AddPengeluaranGajiScreenState
               ),
 
               const SizedBox(height: 16),
-
-              // Dropdown Karyawan dengan Search
-              // Ganti bagian karyawanListAsync.when dengan ini:
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Input Search + Dropdown dalam satu widget
                   karyawanListAsync.when(
                     loading: () => const CircularProgressIndicator(),
                     error: (error, stack) => Text('Error: $error'),
@@ -286,7 +293,6 @@ class _AddPengeluaranGajiScreenState
                     },
                   ),
                   const SizedBox(height: 16),
-                  // Status Karyawan (tetap sama)
                   TextFormField(
                     controller: _statusKaryawanController,
                     readOnly: true,
@@ -301,8 +307,6 @@ class _AddPengeluaranGajiScreenState
               ),
 
               const SizedBox(height: 16),
-
-              // Dropdown Honor
               honorListAsync.when(
                 loading: () => const CircularProgressIndicator(),
                 error: (error, stack) => Text('Error: $error'),
@@ -343,7 +347,24 @@ class _AddPengeluaranGajiScreenState
               ),
 
               const SizedBox(height: 16),
+              TextFormField(
+                controller: _jumlahHariOrBarangController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: _getQuantityLabel(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return '${_getQuantityLabel()} harus diisi';
+                  }
+                  return null;
+                },
+              ),
 
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _jumlahGajiController,
                 readOnly: true,

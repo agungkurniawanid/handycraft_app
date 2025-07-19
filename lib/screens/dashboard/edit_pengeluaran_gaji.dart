@@ -27,6 +27,8 @@ class _EditPengeluaranGajiState extends ConsumerState<EditPengeluaranGaji> {
       TextEditingController();
   final TextEditingController _tipeSatuanController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _jumlahHariOrBarangController =
+      TextEditingController();
 
   String? _selectedKaryawanId;
   String? _selectedKaryawanName;
@@ -40,6 +42,7 @@ class _EditPengeluaranGajiState extends ConsumerState<EditPengeluaranGaji> {
   void initState() {
     super.initState();
     _jumlahGajiController.addListener(_updateTotal);
+    _jumlahHariOrBarangController.addListener(_updateTotal);
     _loadInitialData();
   }
 
@@ -57,7 +60,6 @@ class _EditPengeluaranGajiState extends ConsumerState<EditPengeluaranGaji> {
         _selectedHonorId = _existingData!.honorId;
         _selectedJenisPekerjaan = _existingData!.jenisPekerjaan;
 
-        // Format tanggal dari ISO ke tampilan
         final parsedDate = DateTime.parse(
           _existingData!.tanggalPengeluaranGaji,
         );
@@ -73,6 +75,8 @@ class _EditPengeluaranGajiState extends ConsumerState<EditPengeluaranGaji> {
         _statusKaryawanController.text = _existingData!.statusKaryawan ?? '';
         _tipeSatuanController.text = _existingData!.tipeSatuan ?? '';
         _searchController.text = _existingData!.namaKaryawan;
+        _jumlahHariOrBarangController.text = _existingData!.jumlahHariOrBarang
+            .toString();
       }
     } catch (e) {
       if (mounted) {
@@ -96,7 +100,16 @@ class _EditPengeluaranGajiState extends ConsumerState<EditPengeluaranGaji> {
   void _updateTotal() {
     final jumlahGaji =
         num.tryParse(_jumlahGajiController.text.replaceAll(',', '')) ?? 0;
-    _totalController.text = NumberFormat('#,###').format(jumlahGaji);
+    final jumlahHariOrBarang =
+        num.tryParse(_jumlahHariOrBarangController.text) ?? 0;
+
+    final total = jumlahGaji * jumlahHariOrBarang;
+    _totalController.text = NumberFormat('#,###').format(total);
+  }
+
+  String _getQuantityLabel() {
+    final status = _statusKaryawanController.text;
+    return status == 'Karyawan Tetap' ? 'Jumlah Hari' : 'Jumlah Barang (pcs)';
   }
 
   Future<void> _submitForm() async {
@@ -136,7 +149,7 @@ class _EditPengeluaranGajiState extends ConsumerState<EditPengeluaranGaji> {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pop(context, true); // Return true to indicate success
+        Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
@@ -240,8 +253,6 @@ class _EditPengeluaranGajiState extends ConsumerState<EditPengeluaranGaji> {
               ),
 
               const SizedBox(height: 16),
-
-              // Dropdown Karyawan dengan Search
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -377,8 +388,6 @@ class _EditPengeluaranGajiState extends ConsumerState<EditPengeluaranGaji> {
               ),
 
               const SizedBox(height: 16),
-
-              // Dropdown Honor
               honorListAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, stack) => Text('Error: $error'),
@@ -425,7 +434,24 @@ class _EditPengeluaranGajiState extends ConsumerState<EditPengeluaranGaji> {
               ),
 
               const SizedBox(height: 16),
+              TextFormField(
+                controller: _jumlahHariOrBarangController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: _getQuantityLabel(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return '${_getQuantityLabel()} harus diisi';
+                  }
+                  return null;
+                },
+              ),
 
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _jumlahGajiController,
                 keyboardType: TextInputType.number,

@@ -354,11 +354,7 @@ class DashboardScreen extends ConsumerWidget {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(
-                    Iconsax.calendar,
-                    color: Colors.orange,
-                    size: 30,
-                  ),
+                  icon: Icon(Iconsax.calendar, color: Colors.orange, size: 30),
                   onPressed: () => _selectMonth(context, ref),
                   tooltip: 'Pilih Bulan dan Tahun',
                 ),
@@ -1611,6 +1607,10 @@ class DashboardScreen extends ConsumerWidget {
                 _buildDetailRow('Tanggal', transaction.tanggalPengeluaranGaji),
                 _buildDetailRow('Nama Karyawan', transaction.namaKaryawan),
                 _buildDetailRow('Jenis Honor', transaction.jenisPekerjaan!),
+                _buildDetailRow(
+                  'Jumlah Hari / Barang (pcs)',
+                  transaction.jumlahHariOrBarang.toString(),
+                ),
                 _buildDetailRow(
                   'Jumlah Gaji',
                   _formatCurrency(transaction.jumlahGaji),

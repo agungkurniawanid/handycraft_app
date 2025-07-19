@@ -549,6 +549,10 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
                   pengeluaranGaji.jenisPekerjaan ?? '-',
                 ),
                 _buildDetailRow(
+                  'Jumlah Hari / Barang (pcs)',
+                  pengeluaranGaji.jumlahHariOrBarang.toString(),
+                ),
+                _buildDetailRow(
                   'Jumlah Gaji',
                   _formatCurrency(pengeluaranGaji.jumlahGaji),
                 ),

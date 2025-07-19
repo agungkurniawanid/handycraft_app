@@ -55,7 +55,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final primaryColor = Colors.orange;
+    final primaryColor = const Color(0xFFFF9800);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -78,10 +78,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                     ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.account_balance_wallet,
-                  size: 80,
-                  color: Colors.white,
+                child: Image.asset(
+                  'assets/logo-app.png',
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
                 ),
               ),
             ),

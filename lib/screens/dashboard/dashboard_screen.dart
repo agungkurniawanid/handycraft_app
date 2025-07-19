@@ -283,7 +283,8 @@ class DashboardScreen extends ConsumerWidget {
                 IconButton(
                   icon: Icon(
                     Iconsax.calendar,
-                    color: theme.colorScheme.primary,
+                    color: Colors.orange,
+                    size: 30,
                   ),
                   onPressed: () => _selectMonth(context, ref),
                   tooltip: 'Pilih Bulan dan Tahun',
@@ -399,6 +400,7 @@ class DashboardScreen extends ConsumerWidget {
                         ref.read(selectedFilterTypeProvider.notifier).state =
                             'month',
                     selectedColor: Colors.orange,
+                    checkmarkColor: Colors.white,
                   ),
                   const SizedBox(width: 8),
                   ChoiceChip(
@@ -413,13 +415,14 @@ class DashboardScreen extends ConsumerWidget {
                         ref.read(selectedFilterTypeProvider.notifier).state =
                             'year',
                     selectedColor: Colors.orange,
+                    checkmarkColor: Colors.white,
                   ),
                   const Spacer(),
                   IconButton(
                     icon: Icon(
                       Iconsax.calendar,
-                      color: theme.colorScheme.primary,
-                      size: 20,
+                      color: Colors.orange,
+                      size: 30,
                     ),
                     onPressed: () => filterType == 'month'
                         ? _selectMonth(context, ref)
@@ -584,7 +587,7 @@ class DashboardScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
-                'Pembelian Pelanggan',
+                'Penerimaan Dari Pelanggan',
                 style: textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w600,
                   fontSize: 20,
@@ -878,7 +881,7 @@ class DashboardScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
-                'Pengeluaran Bahan',
+                'Pembelian Bahan Baku',
                 style: textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w600,
                   fontSize: 20,

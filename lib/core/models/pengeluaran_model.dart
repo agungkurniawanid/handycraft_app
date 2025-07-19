@@ -65,6 +65,7 @@ class PengeluaranGajiKaryawan {
   final String? jenisPekerjaan;
   final String? statusKaryawan;
   final String? tipeSatuan;
+  final num? jumlahHariOrBarang;
 
   PengeluaranGajiKaryawan({
     required this.id,
@@ -78,6 +79,7 @@ class PengeluaranGajiKaryawan {
     this.jenisPekerjaan,
     this.statusKaryawan,
     this.tipeSatuan,
+    this.jumlahHariOrBarang,
   });
 
   factory PengeluaranGajiKaryawan.fromSnapshot(DataSnapshot snapshot) {
@@ -94,6 +96,7 @@ class PengeluaranGajiKaryawan {
       jenisPekerjaan: data['jenisPekerjaan'] as String?,
       statusKaryawan: data['statusKaryawan'] as String?,
       tipeSatuan: data['tipeSatuan'] as String?,
+      jumlahHariOrBarang: data['jumlahHariOrBarang'] as num?,
     );
   }
 
@@ -110,6 +113,7 @@ class PengeluaranGajiKaryawan {
       'jenisPekerjaan': jenisPekerjaan,
       'statusKaryawan': statusKaryawan,
       'tipeSatuan': tipeSatuan,
+      'jumlahHariOrBarang': jumlahHariOrBarang,
     };
   }
 }

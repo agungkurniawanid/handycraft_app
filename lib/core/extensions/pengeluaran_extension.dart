@@ -38,6 +38,7 @@ extension PengeluaranGajiKaryawanExtension on PengeluaranGajiKaryawan {
     String? honorId,
     String? jenisPekerjaan,
     String? tipeSatuan,
+    num? jumlahHariOrBarang,
   }) {
     return PengeluaranGajiKaryawan(
       id: id ?? this.id,
@@ -52,6 +53,7 @@ extension PengeluaranGajiKaryawanExtension on PengeluaranGajiKaryawan {
       jenisPekerjaan: jenisPekerjaan ?? this.jenisPekerjaan,
       statusKaryawan: statusKaryawan ?? statusKaryawan,
       tipeSatuan: tipeSatuan ?? this.tipeSatuan,
+      jumlahHariOrBarang: jumlahHariOrBarang ?? this.jumlahHariOrBarang,
     );
   }
 }

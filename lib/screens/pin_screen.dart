@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:handycraft_app/core/providers/pin_provider.dart';
 import 'package:handycraft_app/widgets/navbottom.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:flutter/services.dart';
@@ -12,11 +13,10 @@ class PinScreen extends ConsumerStatefulWidget {
 }
 
 class _PinScreenState extends ConsumerState<PinScreen> {
-  final String _correctPin = "123456";
   String _enteredPin = "";
   bool _isError = false;
   bool _isLoading = false;
-  final Color primaryColor = Colors.orange; 
+  final Color primaryColor = Colors.orange;
 
   void _onNumberPressed(String number) {
     if (_enteredPin.length < 6) {
@@ -47,7 +47,9 @@ class _PinScreenState extends ConsumerState<PinScreen> {
 
     await Future.delayed(const Duration(milliseconds: 300));
 
-    if (_enteredPin == _correctPin) {
+    final pinState = ref.read(pinProvider);
+
+    if (_enteredPin == pinState.pin) {
       await Future.delayed(const Duration(milliseconds: 200));
       if (mounted) {
         Navigator.pushReplacement(
@@ -148,7 +150,9 @@ class _PinScreenState extends ConsumerState<PinScreen> {
                       duration: const Duration(milliseconds: 200),
                       child: _isLoading
                           ? CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                primaryColor,
+                              ),
                             )
                           : SizedBox(
                               height: 20,
@@ -268,9 +272,9 @@ class _PinNumberButton extends StatelessWidget {
             child: Text(
               number,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: primaryColor, // Added primary color to number buttons
-                  ),
+                fontWeight: FontWeight.w500,
+                color: primaryColor, // Added primary color to number buttons
+              ),
             ),
           ),
         ),

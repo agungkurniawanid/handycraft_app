@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:handycraft_app/core/providers/pin_provider.dart';
 import 'package:handycraft_app/screens/pin_screen.dart';
+import 'package:handycraft_app/widgets/navbottom.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -15,14 +17,20 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    await ref.read(pinProvider.notifier).loadSettings();
     _startProgressAnimation();
-    _navigateToDashboard();
+    _navigateToAppropriateScreen();
   }
 
   void _startProgressAnimation() {
     const totalDuration = Duration(seconds: 3);
     const frameRate = Duration(milliseconds: 30);
-    final totalFrames = totalDuration.inMilliseconds ~/ frameRate.inMilliseconds;
+    final totalFrames =
+        totalDuration.inMilliseconds ~/ frameRate.inMilliseconds;
 
     var frameCount = 0;
     _progressValue = 0.0;
@@ -43,11 +51,20 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     Future.delayed(frameRate, updateProgress);
   }
 
-  Future<void> _navigateToDashboard() async {
+  Future<void> _navigateToAppropriateScreen() async {
     await Future.delayed(const Duration(seconds: 4));
-    if (mounted) {
+
+    if (!mounted) return;
+
+    final pinState = ref.read(pinProvider);
+
+    if (pinState.isPinEnabled) {
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const PinScreen()));
+    } else {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const PinScreen()),
+        MaterialPageRoute(builder: (_) => const MainNavigation()),
       );
     }
   }

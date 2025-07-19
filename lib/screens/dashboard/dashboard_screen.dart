@@ -4,6 +4,7 @@ import 'package:handycraft_app/core/models/penerimaan_model.dart';
 import 'package:handycraft_app/core/models/pengeluaran_model.dart';
 import 'package:handycraft_app/core/providers/penerimaan_provider.dart';
 import 'package:handycraft_app/core/providers/pengeluaran_provider.dart';
+import 'package:handycraft_app/core/providers/pin_provider.dart';
 import 'package:handycraft_app/core/providers/summary_total_provider.dart';
 import 'package:handycraft_app/core/providers/theme_provider.dart';
 import 'package:handycraft_app/screens/dashboard/add_pengeluaran_gaji_screen.dart';
@@ -192,14 +193,86 @@ class DashboardScreen extends ConsumerWidget {
     final totalPengeluaran = ref.watch(totalPengeluaranProvider);
     final income = ref.watch(totalPenerimaanProvider);
 
+    void _showSettingsMenu() {
+      final pinState = ref.read(pinProvider);
+
+      showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Iconsax.lock),
+                  title: const Text('Ubah PIN'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showChangePinDialog(context, ref);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(
+                    pinState.isPinEnabled
+                        ? Iconsax.toggle_on
+                        : Iconsax.toggle_off,
+                    color: pinState.isPinEnabled ? Colors.green : Colors.red,
+                  ),
+                  title: Text(
+                    pinState.isPinEnabled
+                        ? 'Nonaktifkan PIN (Aktif)'
+                        : 'Aktifkan PIN (Nonaktif)',
+                  ),
+                  subtitle: Text(
+                    pinState.isPinEnabled
+                        ? 'PIN sedang aktif'
+                        : 'PIN sedang nonaktif',
+                    style: TextStyle(
+                      color: pinState.isPinEnabled ? Colors.green : Colors.red,
+                    ),
+                  ),
+                  onTap: () {
+                    final newState = !pinState.isPinEnabled;
+                    ref
+                        .read(pinProvider.notifier)
+                        .togglePinEnabled(newState, context);
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Iconsax.refresh),
+                  title: const Text('Atur Ulang PIN'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showResetPinConfirmation(context, ref);
+                  },
+                ),
+                const SizedBox(height: 20),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Tutup'),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           'Dashboard HandyCraft',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange),
         ),
-        centerTitle: true,
+        centerTitle: false,
         actions: [
+          IconButton(
+            icon: const Icon(Iconsax.setting),
+            onPressed: _showSettingsMenu,
+            color: Colors.orange,
+          ),
           IconButton(
             icon: Icon(
               isDarkMode ? Iconsax.sun_1 : Iconsax.moon,
@@ -1158,8 +1231,11 @@ class DashboardScreen extends ConsumerWidget {
                   alignment: Alignment.centerRight,
                   child: ElevatedButton.icon(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Iconsax.close_circle,color: Colors.white,),
-                    label: const Text('Tutup', style: TextStyle(color: Colors.white),),
+                    icon: const Icon(Iconsax.close_circle, color: Colors.white),
+                    label: const Text(
+                      'Tutup',
+                      style: TextStyle(color: Colors.white),
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                       shape: RoundedRectangleBorder(
@@ -1225,8 +1301,11 @@ class DashboardScreen extends ConsumerWidget {
                   alignment: Alignment.centerRight,
                   child: ElevatedButton.icon(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Iconsax.close_circle,color: Colors.white,),
-                    label: const Text('Tutup', style: TextStyle(color: Colors.white),),
+                    icon: const Icon(Iconsax.close_circle, color: Colors.white),
+                    label: const Text(
+                      'Tutup',
+                      style: TextStyle(color: Colors.white),
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                       shape: RoundedRectangleBorder(
@@ -1542,8 +1621,11 @@ class DashboardScreen extends ConsumerWidget {
                   alignment: Alignment.centerRight,
                   child: ElevatedButton.icon(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Iconsax.close_circle,color: Colors.white,),
-                    label: const Text('Tutup', style: TextStyle(color: Colors.white),),
+                    icon: const Icon(Iconsax.close_circle, color: Colors.white),
+                    label: const Text(
+                      'Tutup',
+                      style: TextStyle(color: Colors.white),
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                       shape: RoundedRectangleBorder(
@@ -1904,4 +1986,118 @@ String capitalizeEachWord(String text) {
         return word[0].toUpperCase() + word.substring(1);
       })
       .join(' ');
+}
+
+void _showChangePinDialog(BuildContext context, WidgetRef ref) {
+  String currentPin = '';
+  String newPin = '';
+  String confirmPin = '';
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('Ubah PIN'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              obscureText: true,
+              decoration: const InputDecoration(labelText: 'PIN Saat Ini'),
+              onChanged: (value) => currentPin = value,
+            ),
+            TextField(
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'PIN Baru (6 digit)',
+              ),
+              onChanged: (value) => newPin = value,
+            ),
+            TextField(
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Konfirmasi PIN Baru',
+              ),
+              onChanged: (value) => confirmPin = value,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (currentPin != ref.read(pinProvider).pin) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('PIN saat ini salah')),
+                );
+                return;
+              }
+
+              if (newPin.length != 6) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('PIN harus 6 digit')),
+                );
+                return;
+              }
+
+              if (newPin != confirmPin) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Konfirmasi PIN tidak cocok')),
+                );
+                return;
+              }
+
+              ref.read(pinProvider.notifier).updatePin(newPin);
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('PIN berhasil diubah')),
+              );
+            },
+            child: const Text('Simpan'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void _showResetPinConfirmation(BuildContext context, WidgetRef ref) {
+  final currentPinState = ref.read(pinProvider);
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('Atur Ulang PIN'),
+        content: const Text(
+          'Apakah Anda yakin ingin mengatur ulang PIN ke default (123456)?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () {
+              ref
+                  .read(pinProvider.notifier)
+                  .resetPin(keepEnabledStatus: currentPinState.isPinEnabled);
+
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('PIN telah direset ke default'),
+                  action: SnackBarAction(label: 'OK', onPressed: () {}),
+                ),
+              );
+            },
+            child: const Text('Reset'),
+          ),
+        ],
+      );
+    },
+  );
 }

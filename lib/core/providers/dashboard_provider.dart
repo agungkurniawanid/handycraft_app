@@ -6,10 +6,11 @@ final dashboardRepositoryProvider = Provider<DashboardRepository>((ref) {
   return DashboardRepository();
 });
 
-final transactionsStreamProvider = StreamProvider.autoDispose<List<TransactionModel>>((ref) {
-  final repository = ref.watch(dashboardRepositoryProvider);
-  return repository.getTransactionsForCurrentMonth();
-});
+final transactionsStreamProvider =
+    StreamProvider.autoDispose<List<TransactionModel>>((ref) {
+      final repository = ref.watch(dashboardRepositoryProvider);
+      return repository.getTransactionsForCurrentMonth();
+    });
 
 class DashboardData {
   final double income;
@@ -27,38 +28,39 @@ class DashboardData {
   });
 }
 
-final dashboardControllerProvider = Provider.autoDispose<AsyncValue<DashboardData>>((ref) {
-  final asyncTransactions = ref.watch(transactionsStreamProvider);
+final dashboardControllerProvider =
+    Provider.autoDispose<AsyncValue<DashboardData>>((ref) {
+      final asyncTransactions = ref.watch(transactionsStreamProvider);
 
-  return asyncTransactions.when(
-    data: (transactions) {
-      double totalIncome = 0;
-      double totalExpense = 0;
+      return asyncTransactions.when(
+        data: (transactions) {
+          double totalIncome = 0;
+          double totalExpense = 0;
 
-      for (var transaction in transactions) {
-        if (transaction.tipe == 'penerimaan') {
-          totalIncome += transaction.jumlah;
-        } else if (transaction.tipe == 'pengeluaran') {
-          totalExpense += transaction.jumlah;
-        }
-      }
+          for (var transaction in transactions) {
+            if (transaction.tipe == 'penerimaan') {
+              totalIncome += transaction.jumlah;
+            } else if (transaction.tipe == 'pengeluaran') {
+              totalExpense += transaction.jumlah;
+            }
+          }
 
-      final profit = totalIncome - totalExpense;
-      final isProfit = profit >= 0;
+          final profit = totalIncome - totalExpense;
+          final isProfit = profit >= 0;
 
-      final recent = transactions.take(4).toList();
+          final recent = transactions.take(4).toList();
 
-      return AsyncValue.data(
-        DashboardData(
-          income: totalIncome,
-          expense: totalExpense,
-          profit: profit,
-          isProfit: isProfit,
-          recentTransactions: recent,
-        ),
+          return AsyncValue.data(
+            DashboardData(
+              income: totalIncome,
+              expense: totalExpense,
+              profit: profit,
+              isProfit: isProfit,
+              recentTransactions: recent,
+            ),
+          );
+        },
+        loading: () => const AsyncValue.loading(),
+        error: (error, stackTrace) => AsyncValue.error(error, stackTrace),
       );
-    },
-    loading: () => const AsyncValue.loading(),
-    error: (error, stackTrace) => AsyncValue.error(error, stackTrace),
-  );
-});
+    });

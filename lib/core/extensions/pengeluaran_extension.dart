@@ -57,3 +57,21 @@ extension PengeluaranGajiKaryawanExtension on PengeluaranGajiKaryawan {
     );
   }
 }
+
+extension PengeluaranLainnyaExtension on PengeluaranLainnya {
+  PengeluaranLainnya copyWith({
+    String? id,
+    String? tanggal,
+    String? uraian,
+    num? nominal,
+    String? keterangan,
+  }) {
+    return PengeluaranLainnya(
+      id: id ?? this.id,
+      tanggal: tanggal ?? this.tanggal,
+      uraian: uraian ?? this.uraian,
+      nominal: nominal ?? this.nominal,
+      keterangan: keterangan ?? this.keterangan,
+    );
+  }
+}

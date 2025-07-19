@@ -117,14 +117,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                   ),
                 ],
               ),
-              child: const Text('HandyCraft'),
+              child: const Text('Rahmat HandyCraft'),
             ),
             const SizedBox(height: 10),
             AnimatedOpacity(
               duration: const Duration(milliseconds: 1000),
               opacity: 1,
               child: Text(
-                'Keuangan UMKM Perkayuan',
+                'Keuangan UMKM Pengrajin Kayu',
                 style: theme.textTheme.titleMedium!.copyWith(
                   color: Colors.black.withOpacity(0.8),
                 ),

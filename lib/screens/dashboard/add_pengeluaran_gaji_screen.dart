@@ -136,7 +136,7 @@ class _AddPengeluaranGajiScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Pengeluaran Gaji'),
+        title: const Text('Tambah Pengeluaran Upah'),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Iconsax.arrow_left_2),
@@ -370,7 +370,7 @@ class _AddPengeluaranGajiScreenState
                 readOnly: true,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  labelText: 'Jumlah Gaji',
+                  labelText: 'Upah Per Satuan',
                   prefixText: 'Rp ',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),

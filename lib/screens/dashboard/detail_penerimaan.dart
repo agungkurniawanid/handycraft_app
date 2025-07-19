@@ -464,12 +464,14 @@ class _DetailPenerimaanState extends ConsumerState<DetailPenerimaan> {
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
                   minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
+                  
                 ),
-                child: const Text('Tutup'),
+                child: const Text('Tutup', style: TextStyle(color: Colors.white),),
               ),
             ],
           ),

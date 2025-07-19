@@ -45,6 +45,19 @@ final filteredPengeluaranGajiProvider =
       }).toList();
     });
 
+final filteredPengeluaranLainnyaProvider =
+    Provider.autoDispose<List<PengeluaranLainnya>>((ref) {
+      final lainnyaList =
+          ref.watch(pengeluaranLainnyaStreamProvider).value ?? [];
+      final selectedDate = ref.watch(selectedDateProvider);
+
+      return lainnyaList.where((item) {
+        final itemDate = DateTime.parse(item.tanggal);
+        return itemDate.month == selectedDate.month &&
+            itemDate.year == selectedDate.year;
+      }).toList();
+    });
+
 final totalPenerimaanProvider = Provider.autoDispose<double>((ref) {
   final filteredList = ref.watch(filteredPenerimaanProvider);
   return filteredList.fold(0.0, (sum, item) => sum + item.total.toDouble());
@@ -53,6 +66,7 @@ final totalPenerimaanProvider = Provider.autoDispose<double>((ref) {
 final totalPengeluaranProvider = Provider.autoDispose<double>((ref) {
   final pengeluaranList = ref.watch(filteredPengeluaranProvider);
   final gajiList = ref.watch(filteredPengeluaranGajiProvider);
+  final lainnyaList = ref.watch(filteredPengeluaranLainnyaProvider);
 
   final totalPengeluaran = pengeluaranList.fold(
     0.0,
@@ -62,8 +76,12 @@ final totalPengeluaranProvider = Provider.autoDispose<double>((ref) {
     0.0,
     (sum, item) => sum + item.total.toDouble(),
   );
+  final totalLainnya = lainnyaList.fold(
+    0.0,
+    (sum, item) => sum + item.nominal.toDouble(),
+  );
 
-  return totalPengeluaran + totalGaji;
+  return totalPengeluaran + totalGaji + totalLainnya;
 });
 
 final totalProfitProvider = Provider.autoDispose<double>((ref) {

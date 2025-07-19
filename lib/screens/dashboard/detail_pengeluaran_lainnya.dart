@@ -2,20 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:handycraft_app/core/models/pengeluaran_model.dart';
 import 'package:handycraft_app/core/providers/pengeluaran_provider.dart';
-import 'package:handycraft_app/screens/dashboard/edit_pengeluaran_gaji.dart';
+import 'package:handycraft_app/screens/dashboard/edit_pengeluaran_lainnya.dart';
 import 'package:intl/intl.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 
-class DetailPengeluaranGaji extends ConsumerStatefulWidget {
-  const DetailPengeluaranGaji({super.key});
+class DetailPengeluaranLainnya extends ConsumerStatefulWidget {
+  final List<PengeluaranLainnya> pengeluaranList;
+
+  const DetailPengeluaranLainnya({super.key, required this.pengeluaranList});
 
   @override
-  ConsumerState<DetailPengeluaranGaji> createState() =>
-      _DetailPengeluaranGajiState();
+  ConsumerState<DetailPengeluaranLainnya> createState() =>
+      _DetailPengeluaranLainnyaState();
 }
 
-class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
+class _DetailPengeluaranLainnyaState
+    extends ConsumerState<DetailPengeluaranLainnya> {
   String _selectedFilter = 'hari';
   String _sortOrder = 'terbesar';
   DateTime? _selectedMonth;
@@ -23,8 +26,7 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
 
   @override
   Widget build(BuildContext context) {
-    final AsyncValue<List<PengeluaranGajiKaryawan>> pengeluaranGajiAsync = ref
-        .watch(pengeluaranGajiKaryawanStreamProvider);
+    final filteredPengeluaran = _applyFilters(widget.pengeluaranList);
 
     return Scaffold(
       appBar: AppBar(
@@ -32,110 +34,78 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Detail Pengeluaran Upah'),
+        title: const Text('Detail Pengeluaran Lainnya'),
         centerTitle: true,
       ),
-      body: pengeluaranGajiAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Error: $error')),
-        data: (allPengeluaranGaji) {
-          final filteredPengeluaranGaji = _applyFilters(allPengeluaranGaji);
-
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        _buildFilterButton(
-                          'hari',
-                          'Hari Ini',
-                          allPengeluaranGaji,
-                        ),
-                        _buildFilterButton(
-                          'minggu',
-                          'Minggu Ini',
-                          allPengeluaranGaji,
-                        ),
-                        _buildFilterButton(
-                          'bulan',
-                          'Bulan Ini',
-                          allPengeluaranGaji,
-                        ),
-                        _buildFilterButton(
-                          'tahun',
-                          'Tahun Ini',
-                          allPengeluaranGaji,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      value: _sortOrder,
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'terbesar',
-                          child: Text('Gaji Tertinggi'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'terkecil',
-                          child: Text('Gaji Terendah'),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          _sortOrder = value!;
-                        });
-                      },
-                      decoration: InputDecoration(
-                        labelText: 'Urutkan',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        filled: true,
-                        fillColor: Theme.of(context).cardColor,
-                      ),
-                      dropdownColor: Theme.of(context).cardColor,
-                      style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyLarge?.color,
-                      ),
-                    ),
+                    _buildFilterButton('hari', 'Hari Ini'),
+                    _buildFilterButton('minggu', 'Minggu Ini'),
+                    _buildFilterButton('bulan', 'Bulan Ini'),
+                    _buildFilterButton('tahun', 'Tahun Ini'),
                   ],
                 ),
-              ),
-              Expanded(
-                child: filteredPengeluaranGaji.isEmpty
-                    ? const Center(
-                        child: Text('Tidak ada data pengeluaran gaji'),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: filteredPengeluaranGaji.length,
-                        itemBuilder: (context, index) {
-                          return _buildPengeluaranGajiCard(
-                            filteredPengeluaranGaji[index],
-                          );
-                        },
-                      ),
-              ),
-            ],
-          );
-        },
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: _sortOrder,
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'terbesar',
+                      child: Text('Nominal Tertinggi'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'terkecil',
+                      child: Text('Nominal Terendah'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _sortOrder = value!;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Urutkan',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Theme.of(context).cardColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: filteredPengeluaran.isEmpty
+                ? const Center(child: Text('Tidak ada data pengeluaran'))
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: filteredPengeluaran.length,
+                    itemBuilder: (context, index) {
+                      return _buildPengeluaranCard(filteredPengeluaran[index]);
+                    },
+                  ),
+          ),
+        ],
       ),
     );
   }
 
-  List<PengeluaranGajiKaryawan> _applyFilters(
-    List<PengeluaranGajiKaryawan> allPengeluaranGaji,
+  List<PengeluaranLainnya> _applyFilters(
+    List<PengeluaranLainnya> allPengeluaran,
   ) {
     final now = DateTime.now();
-    List<PengeluaranGajiKaryawan> filtered = allPengeluaranGaji;
+    List<PengeluaranLainnya> filtered = allPengeluaran;
 
     // Filter berdasarkan periode
     filtered = filtered.where((p) {
-      final date = DateTime.parse(p.tanggalPengeluaranGaji);
+      final date = DateTime.parse(p.tanggal);
       switch (_selectedFilter) {
         case 'hari':
           return date.year == now.year &&
@@ -162,11 +132,11 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
       }
     }).toList();
 
-    // Sort berdasarkan total gaji
+    // Sort berdasarkan nominal
     filtered.sort((a, b) {
       return _sortOrder == 'terbesar'
-          ? b.total.compareTo(a.total)
-          : a.total.compareTo(b.total);
+          ? b.nominal.compareTo(a.nominal)
+          : a.nominal.compareTo(b.nominal);
     });
 
     return filtered;
@@ -212,14 +182,10 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
     );
   }
 
-  Widget _buildFilterButton(
-    String filterType,
-    String label,
-    List<PengeluaranGajiKaryawan> allPengeluaranGaji,
-  ) {
+  Widget _buildFilterButton(String filterType, String label) {
     final isSelected = _selectedFilter == filterType;
     final isMonthYear = filterType == 'bulan' || filterType == 'tahun';
-    final orangeColor = Colors.orange; // Define orange color
+    final orangeColor = Colors.orange;
 
     return Expanded(
       child: GestureDetector(
@@ -262,11 +228,7 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
                       : _selectedYear != null
                       ? _selectedYear!.year.toString()
                       : DateTime.now().year.toString(),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color:
-                        Colors.white, // White text for month/year when selected
-                  ),
+                  style: const TextStyle(fontSize: 12, color: Colors.white),
                 ),
             ],
           ),
@@ -292,26 +254,15 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
     }
   }
 
-  String capitalizeEachWord(String text) {
-    if (text.isEmpty) return text;
-    return text
-        .split(' ')
-        .map((word) {
-          if (word.isEmpty) return word;
-          return word[0].toUpperCase() + word.substring(1).toLowerCase();
-        })
-        .join(' ');
-  }
-
-  Widget _buildPengeluaranGajiCard(PengeluaranGajiKaryawan pengeluaranGaji) {
+  Widget _buildPengeluaranCard(PengeluaranLainnya pengeluaran) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
     final textTheme = theme.textTheme;
     final cardColor = isDarkMode ? const Color(0xFF222831) : Colors.white;
     final textColor = isDarkMode ? Colors.white : Colors.grey[800];
     final secondaryTextColor = isDarkMode ? Colors.grey[400] : Colors.grey[600];
-    final formattedAmount = _formatCurrency(pengeluaranGaji.total);
-    final formattedDate = _formatDate(pengeluaranGaji.tanggalPengeluaranGaji);
+    final formattedAmount = _formatCurrency(pengeluaran.nominal);
+    final formattedDate = _formatDate(pengeluaran.tanggal);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -342,14 +293,14 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.orange.withOpacity(
+                        color: Colors.purple.withOpacity(
                           isDarkMode ? 0.3 : 0.1,
                         ),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
-                        Iconsax.profile_2user,
-                        color: Colors.orange,
+                        Iconsax.receipt,
+                        color: Colors.purple,
                         size: 20,
                       ),
                     ),
@@ -358,7 +309,7 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          capitalizeEachWord(pengeluaranGaji.namaKaryawan),
+                          pengeluaran.uraian,
                           style: textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
@@ -392,7 +343,7 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
                           ),
                         ],
                       ),
-                      onTap: () => _showPengeluaranGajiDetail(pengeluaranGaji),
+                      onTap: () => _showPengeluaranDetail(pengeluaran),
                     ),
                     PopupMenuItem(
                       child: Row(
@@ -411,8 +362,8 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => EditPengeluaranGaji(
-                              pengeluaranGajiId: pengeluaranGaji.id,
+                            builder: (context) => EditPengeluaranLainnya(
+                              pengeluaranLainnyaId: pengeluaran.id,
                             ),
                           ),
                         );
@@ -431,7 +382,7 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
                           ),
                         ],
                       ),
-                      onTap: () => _showDeleteDialog(pengeluaranGaji.id),
+                      onTap: () => _showDeleteDialog(pengeluaran.id),
                     ),
                   ],
                   color: Theme.of(context).cardColor,
@@ -446,19 +397,16 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Jenis Honor',
+                      'Keterangan',
                       style: textTheme.bodySmall?.copyWith(
                         color: secondaryTextColor,
                       ),
                     ),
                     Text(
-                      pengeluaranGaji.jenisPekerjaan != null
-                          ? capitalizeEachWord(pengeluaranGaji.jenisPekerjaan!)
+                      pengeluaran.keterangan.isNotEmpty
+                          ? pengeluaran.keterangan
                           : '-',
-                      style: textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: textColor,
-                      ),
+                      style: textTheme.bodyMedium?.copyWith(color: textColor),
                     ),
                   ],
                 ),
@@ -466,7 +414,7 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      'Total Gaji',
+                      'Total',
                       style: textTheme.bodySmall?.copyWith(
                         color: secondaryTextColor,
                       ),
@@ -482,38 +430,19 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
                 ),
               ],
             ),
-            if (pengeluaranGaji.keterangan.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Keterangan',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: secondaryTextColor,
-                    ),
-                  ),
-                  Text(
-                    capitalizeEachWord(pengeluaranGaji.keterangan),
-                    style: textTheme.bodyMedium?.copyWith(color: textColor),
-                  ),
-                ],
-              ),
-            ],
           ],
         ),
       ),
     );
   }
 
-  void _showPengeluaranGajiDetail(PengeluaranGajiKaryawan pengeluaranGaji) {
+  void _showPengeluaranDetail(PengeluaranLainnya pengeluaran) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       backgroundColor: Theme.of(context).cardColor,
-
       builder: (context) {
         return Padding(
           padding: const EdgeInsets.all(16),
@@ -533,36 +462,24 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
                   ),
                 ),
                 Text(
-                  'Detail Pengeluaran Gaji',
+                  'Detail Pengeluaran Lainnya',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 12),
+                _buildDetailRow('Tanggal', _formatDate(pengeluaran.tanggal)),
+                _buildDetailRow('Uraian', pengeluaran.uraian),
                 _buildDetailRow(
-                  'Tanggal',
-                  _formatDate(pengeluaranGaji.tanggalPengeluaranGaji),
-                ),
-                _buildDetailRow('Nama Karyawan', pengeluaranGaji.namaKaryawan),
-                _buildDetailRow(
-                  'Jenis Honor',
-                  pengeluaranGaji.jenisPekerjaan ?? '-',
+                  'Nominal',
+                  _formatCurrency(pengeluaran.nominal),
                 ),
                 _buildDetailRow(
-                  'Jumlah Hari / Barang (pcs)',
-                  pengeluaranGaji.jumlahHariOrBarang.toString(),
+                  'Keterangan',
+                  pengeluaran.keterangan.isNotEmpty
+                      ? pengeluaran.keterangan
+                      : '-',
                 ),
-                _buildDetailRow(
-                  'Jumlah Gaji',
-                  _formatCurrency(pengeluaranGaji.jumlahGaji),
-                ),
-                _buildDetailRow(
-                  'Total',
-                  _formatCurrency(pengeluaranGaji.total),
-                ),
-                if (pengeluaranGaji.tipeSatuan != null)
-                  _buildDetailRow('Tipe Satuan', pengeluaranGaji.tipeSatuan!),
-                _buildDetailRow('Keterangan', pengeluaranGaji.keterangan),
                 const SizedBox(height: 16),
                 Align(
                   alignment: Alignment.centerRight,
@@ -625,7 +542,7 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).cardColor,
         title: Text(
-          'Hapus Pengeluaran Gaji',
+          'Hapus Pengeluaran',
           style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
         ),
         content: Text(
@@ -645,12 +562,12 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
           TextButton(
             onPressed: () {
               ref
-                  .read(pengeluaranGajiKaryawanRepositoryProvider)
-                  .deletePengeluaranGajiKaryawan(id);
+                  .read(pengeluaranLainnyaRepositoryProvider)
+                  .deletePengeluaranLainnya(id);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Data pengeluaran gaji berhasil dihapus'),
+                  content: Text('Data pengeluaran berhasil dihapus'),
                   backgroundColor: Colors.green,
                 ),
               );

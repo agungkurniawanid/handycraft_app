@@ -108,3 +108,51 @@ class PengeluaranGajiKaryawanRepository {
     return null;
   }
 }
+
+class PengeluaranLainnyaRepository {
+  final FirebaseApp _firebaseApp = Firebase.app('MyAppInstance');
+  late final DatabaseReference _dbRef;
+
+  PengeluaranLainnyaRepository() {
+    _dbRef = FirebaseDatabase.instanceFor(app: _firebaseApp).ref();
+  }
+
+  Future<void> addPengeluaranLainnya(PengeluaranLainnya pengeluaran) async {
+    final newRef = _dbRef.child('master_data/pengeluaran_lainnya').push();
+    await newRef.set(pengeluaran.copyWith(id: newRef.key).toJson());
+  }
+
+  Future<void> updatePengeluaranLainnya(PengeluaranLainnya pengeluaran) async {
+    await _dbRef
+        .child('master_data/pengeluaran_lainnya')
+        .child(pengeluaran.id)
+        .update(pengeluaran.toJson());
+  }
+
+  Future<void> deletePengeluaranLainnya(String id) async {
+    await _dbRef.child('master_data/pengeluaran_lainnya').child(id).remove();
+  }
+
+  Stream<List<PengeluaranLainnya>> getPengeluaranLainnyaStream() {
+    final query = _dbRef.child('master_data/pengeluaran_lainnya');
+    return query.onValue.map((event) {
+      if (event.snapshot.exists && event.snapshot.value != null) {
+        return event.snapshot.children.map((snapshot) {
+          return PengeluaranLainnya.fromSnapshot(snapshot);
+        }).toList();
+      }
+      return [];
+    });
+  }
+
+  Future<PengeluaranLainnya?> getPengeluaranLainnyaById(String id) async {
+    final snapshot = await _dbRef
+        .child('master_data/pengeluaran_lainnya')
+        .child(id)
+        .get();
+    if (snapshot.exists) {
+      return PengeluaranLainnya.fromSnapshot(snapshot);
+    }
+    return null;
+  }
+}

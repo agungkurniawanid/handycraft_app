@@ -23,3 +23,14 @@ final pengeluaranGajiKaryawanStreamProvider =
       final repository = ref.watch(pengeluaranGajiKaryawanRepositoryProvider);
       return repository.getPengeluaranGajiKaryawanStream();
     });
+
+final pengeluaranLainnyaRepositoryProvider =
+    Provider<PengeluaranLainnyaRepository>((ref) {
+      return PengeluaranLainnyaRepository();
+    });
+
+final pengeluaranLainnyaStreamProvider =
+    StreamProvider.autoDispose<List<PengeluaranLainnya>>((ref) {
+      final repository = ref.watch(pengeluaranLainnyaRepositoryProvider);
+      return repository.getPengeluaranLainnyaStream();
+    });

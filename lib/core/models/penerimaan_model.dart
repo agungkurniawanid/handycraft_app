@@ -52,3 +52,40 @@ class PenerimaanModel {
     };
   }
 }
+
+class PenerimaanLainnya {
+  final String id;
+  final String tanggal;
+  final String uraian;
+  final num nominal;
+  final String keterangan;
+
+  PenerimaanLainnya({
+    required this.id,
+    required this.tanggal,
+    required this.uraian,
+    required this.nominal,
+    required this.keterangan,
+  });
+
+  factory PenerimaanLainnya.fromSnapshot(DataSnapshot snapshot) {
+    final data = snapshot.value as Map<dynamic, dynamic>;
+    return PenerimaanLainnya(
+      id: snapshot.key ?? '',
+      tanggal: data['tanggal'] as String,
+      uraian: data['uraian'] as String,
+      nominal: data['nominal'] as num,
+      keterangan: data['keterangan'] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'tanggal': tanggal,
+      'uraian': uraian,
+      'nominal': nominal,
+      'keterangan': keterangan,
+    };
+  }
+}

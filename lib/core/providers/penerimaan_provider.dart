@@ -11,3 +11,14 @@ final penerimaanStreamProvider =
       final repository = ref.watch(penerimaanRepositoryProvider);
       return repository.getPenerimaanStream();
     });
+
+final penerimaanLainnyaRepositoryProvider =
+    Provider<PenerimaanLainnyaRepository>((ref) {
+      return PenerimaanLainnyaRepository();
+    });
+
+final penerimaanLainnyaStreamProvider =
+    StreamProvider.autoDispose<List<PenerimaanLainnya>>((ref) {
+      final repository = ref.watch(penerimaanLainnyaRepositoryProvider);
+      return repository.getPenerimaanLainnyaStream();
+    });

@@ -34,3 +34,21 @@ extension IterableExtension<T> on Iterable<T> {
     return null;
   }
 }
+
+extension PenerimaanLainnyaExtension on PenerimaanLainnya {
+  PenerimaanLainnya copyWith({
+    String? id,
+    String? tanggal,
+    String? uraian,
+    num? nominal,
+    String? keterangan,
+  }) {
+    return PenerimaanLainnya(
+      id: id ?? this.id,
+      tanggal: tanggal ?? this.tanggal,
+      uraian: uraian ?? this.uraian,
+      nominal: nominal ?? this.nominal,
+      keterangan: keterangan ?? this.keterangan,
+    );
+  }
+}

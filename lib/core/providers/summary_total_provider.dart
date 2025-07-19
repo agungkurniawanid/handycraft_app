@@ -60,7 +60,19 @@ final filteredPengeluaranLainnyaProvider =
 
 final totalPenerimaanProvider = Provider.autoDispose<double>((ref) {
   final filteredList = ref.watch(filteredPenerimaanProvider);
-  return filteredList.fold(0.0, (sum, item) => sum + item.total.toDouble());
+  final penerimaanLainnyaList =
+      ref.watch(penerimaanLainnyaStreamProvider).value ?? [];
+
+  final finalTotal = filteredList.fold(
+    0.0,
+    (sum, item) => sum + item.total.toDouble(),
+  );
+  final lainnyaTotal = penerimaanLainnyaList.fold(
+    0.0,
+    (sum, item) => sum + item.nominal.toDouble(),
+  );
+
+  return finalTotal + lainnyaTotal;
 });
 
 final totalPengeluaranProvider = Provider.autoDispose<double>((ref) {

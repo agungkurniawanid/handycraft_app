@@ -7,19 +7,22 @@ import 'package:handycraft_app/core/providers/pengeluaran_provider.dart';
 import 'package:handycraft_app/core/providers/pin_provider.dart';
 import 'package:handycraft_app/core/providers/summary_total_provider.dart';
 import 'package:handycraft_app/core/providers/theme_provider.dart';
+import 'package:handycraft_app/screens/dashboard/add_penerimaan_lainnya.dart';
+import 'package:handycraft_app/screens/dashboard/add_penerimaan_screen.dart';
 import 'package:handycraft_app/screens/dashboard/add_pengeluaran_gaji_screen.dart';
 import 'package:handycraft_app/screens/dashboard/add_pengeluaran_lainnya.dart';
 import 'package:handycraft_app/screens/dashboard/add_pengeluaran_screen.dart';
+import 'package:handycraft_app/screens/dashboard/detail_Penerimaan_lainnya.dart';
 import 'package:handycraft_app/screens/dashboard/detail_penerimaan.dart';
 import 'package:handycraft_app/screens/dashboard/detail_pengeluaran.dart';
 import 'package:handycraft_app/screens/dashboard/detail_pengeluaran_gaji.dart';
 import 'package:handycraft_app/screens/dashboard/detail_pengeluaran_lainnya.dart';
+import 'package:handycraft_app/screens/dashboard/edit_penerimaan_lainnya.dart';
 import 'package:handycraft_app/screens/dashboard/edit_penerimaan_screen.dart';
 import 'package:handycraft_app/screens/dashboard/edit_pengeluaran_gaji.dart';
 import 'package:handycraft_app/screens/dashboard/edit_pengeluaran_lainnya.dart';
 import 'package:handycraft_app/screens/dashboard/edit_pengeluaran_screen.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:handycraft_app/screens/dashboard/add_penerimaan_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import '../../core/providers/dashboard_provider.dart';
@@ -101,6 +104,8 @@ class DashboardScreen extends ConsumerWidget {
         return 'pengeluaran gaji karyawan';
       case 4:
         return 'pengeluaran lainnya';
+      case 5:
+        return 'penerimaan lainnya';
       default:
         return '';
     }
@@ -131,6 +136,10 @@ class DashboardScreen extends ConsumerWidget {
           await ref
               .read(pengeluaranLainnyaRepositoryProvider)
               .deletePengeluaranLainnya(id);
+        case 5:
+          await ref
+              .read(penerimaanLainnyaRepositoryProvider)
+              .deletePenerimaanLainnya(id);
           break;
       }
 
@@ -200,13 +209,13 @@ class DashboardScreen extends ConsumerWidget {
       pengeluaranGajiKaryawanStreamProvider,
     );
     final pengeluaranLainnyaAsync = ref.watch(pengeluaranLainnyaStreamProvider);
+    final penerimaanLainnyaAsync = ref.watch(penerimaanLainnyaStreamProvider);
     final totalPenerimaan = ref.watch(totalPenerimaanProvider);
     final totalPengeluaran = ref.watch(totalPengeluaranProvider);
     final income = ref.watch(totalPenerimaanProvider);
 
     void _showSettingsMenu() {
       final pinState = ref.read(pinProvider);
-
       showModalBottomSheet(
         context: context,
         builder: (context) {
@@ -318,6 +327,12 @@ class DashboardScreen extends ConsumerWidget {
                 const SizedBox(height: 20),
                 _buildPengeluaranLainnyaList(
                   pengeluaranLainnyaAsync,
+                  ref,
+                  context,
+                ),
+                const SizedBox(height: 20),
+                _buildPenerimaanLainnyaList(
+                  penerimaanLainnyaAsync,
                   ref,
                   context,
                 ),
@@ -1422,9 +1437,63 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   void _navigateToPenerimaan(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const AddPenerimaanScreen()),
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Pilih Jenis Penerimaan',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildExpenseOptionCard(
+                  context,
+                  icon: Icons.receipt_long,
+                  title: 'Penerimaan Pembelian Pelanggan',
+                  subtitle:
+                      'Catat penerimaan untuk pembelian pelanggan dari barang toko.',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AddPenerimaanScreen(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                _buildExpenseOptionCard(
+                  context,
+                  icon: Icons.monetization_on,
+                  title: 'Penerimaan Lainnya',
+                  subtitle:
+                      'Catat penerimaan pembelian lainnya yang tidak termasuk kategori di atas',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AddPenerimaanLainnya(),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -2342,22 +2411,18 @@ class DashboardScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 _buildDetailLainnyaRow(
-                  context, // Tambahkan context di sini
+                  context,
                   'Tanggal',
                   _formatDate(pengeluaran.tanggal),
                 ),
+                _buildDetailLainnyaRow(context, 'Uraian', pengeluaran.uraian),
                 _buildDetailLainnyaRow(
-                  context, // Tambahkan context di sini
-                  'Uraian',
-                  pengeluaran.uraian,
-                ),
-                _buildDetailLainnyaRow(
-                  context, // Tambahkan context di sini
+                  context,
                   'Nominal',
                   _formatCurrency(pengeluaran.nominal),
                 ),
                 _buildDetailLainnyaRow(
-                  context, // Tambahkan context di sini
+                  context,
                   'Keterangan',
                   pengeluaran.keterangan.isNotEmpty
                       ? pengeluaran.keterangan
@@ -2390,6 +2455,404 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   Widget _buildDetailLainnyaRow(
+    BuildContext context,
+    String label,
+    String value,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPenerimaanLainnyaList(
+    AsyncValue<List<PenerimaanLainnya>> asyncPenerimaanLainnya,
+    WidgetRef ref,
+    BuildContext context,
+  ) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+    final textTheme = theme.textTheme;
+    final cardColor = isDarkMode ? Color(0xFF222831) : Colors.white;
+    final textColor = isDarkMode ? Colors.white : Colors.grey[800];
+    final secondaryTextColor = isDarkMode ? Colors.grey[400] : Colors.grey[600];
+
+    return asyncPenerimaanLainnya.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, _) => Center(child: Text('Error: $err')),
+      data: (penerimaanList) {
+        if (penerimaanList.isEmpty) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Text('Belum ada data penerimaan lainnya.'),
+            ),
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    'Penerimaan Lainnya',
+                    style: textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 20,
+                      color: textColor,
+                    ),
+                  ),
+                ),
+                const Spacer(),
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DetailPenerimaanLainnya(
+                              penerimaanList: penerimaanList,
+                            ),
+                          ),
+                        ),
+                      },
+                      child: Text(
+                        'Lihat Semua',
+                        style: textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.orange,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    const Icon(
+                      Iconsax.arrow_right_25,
+                      size: 20,
+                      color: Colors.orange,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ...penerimaanList.take(7).map((penerimaan) {
+              final formattedAmount = _formatCurrency(penerimaan.nominal);
+              final formattedDate = _formatDate(penerimaan.tanggal);
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: isDarkMode
+                      ? null
+                      : [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.1),
+                            spreadRadius: 1,
+                            blurRadius: 6,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.blueAccent.withOpacity(
+                                    isDarkMode ? 0.3 : 0.1,
+                                  ),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Iconsax.dollar_circle,
+                                  color: Colors.blueAccent,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    penerimaan.uraian,
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      color: textColor,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    formattedDate,
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: secondaryTextColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          PopupMenuButton(
+                            icon: Icon(
+                              Icons.more_vert,
+                              color: secondaryTextColor,
+                            ),
+                            itemBuilder: (context) => [
+                              PopupMenuItem(
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.book,
+                                      size: 20,
+                                      color: textColor,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Detail',
+                                      style: textTheme.bodyMedium?.copyWith(
+                                        color: textColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                onTap: () => _showPenerimaanLainnyaDetail(
+                                  context,
+                                  penerimaan,
+                                ),
+                              ),
+                              PopupMenuItem(
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.edit,
+                                      size: 20,
+                                      color: textColor,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Edit',
+                                      style: textTheme.bodyMedium?.copyWith(
+                                        color: textColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          EditPenerimaanLainnya(
+                                            penerimaanLainnyaId: penerimaan.id,
+                                          ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              PopupMenuItem(
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.delete,
+                                      size: 20,
+                                      color: Colors.red[400],
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Hapus',
+                                      style: textTheme.bodyMedium?.copyWith(
+                                        color: Colors.red[400],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                onTap: () => _showDeleteConfirmationDialog(
+                                  context,
+                                  penerimaan.id,
+                                  5,
+                                  ref,
+                                ),
+                              ),
+                            ],
+                            color: Theme.of(context).cardColor,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Keterangan',
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: secondaryTextColor,
+                                ),
+                              ),
+                              Text(
+                                penerimaan.keterangan.isNotEmpty
+                                    ? penerimaan.keterangan
+                                    : '-',
+                                style: textTheme.bodyMedium?.copyWith(
+                                  color: textColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                'Total',
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: secondaryTextColor,
+                                ),
+                              ),
+                              Text(
+                                '+$formattedAmount',
+                                style: textTheme.bodyLarge?.copyWith(
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showPenerimaanLainnyaDetail(
+    BuildContext context,
+    PenerimaanLainnya penerimaan,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      backgroundColor: Theme.of(context).cardColor,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                Text(
+                  'Detail Penerimaan Lainnya',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildDetailPenerimaanLainnyaRow(
+                  context,
+                  'Tanggal',
+                  _formatDate(penerimaan.tanggal),
+                ),
+                _buildDetailPenerimaanLainnyaRow(
+                  context,
+                  'Uraian',
+                  penerimaan.uraian,
+                ),
+                _buildDetailPenerimaanLainnyaRow(
+                  context,
+                  'Nominal',
+                  _formatCurrency(penerimaan.nominal),
+                ),
+                _buildDetailPenerimaanLainnyaRow(
+                  context,
+                  'Keterangan',
+                  penerimaan.keterangan.isNotEmpty
+                      ? penerimaan.keterangan
+                      : '-',
+                ),
+                const SizedBox(height: 16),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton.icon(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Iconsax.close_circle, color: Colors.white),
+                    label: const Text(
+                      'Tutup',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailPenerimaanLainnyaRow(
     BuildContext context,
     String label,
     String value,
@@ -2555,7 +3018,6 @@ void _showChangePinDialog(BuildContext context, WidgetRef ref) {
 
 void _showResetPinConfirmation(BuildContext context, WidgetRef ref) {
   final currentPinState = ref.read(pinProvider);
-
   showDialog(
     context: context,
     builder: (context) {

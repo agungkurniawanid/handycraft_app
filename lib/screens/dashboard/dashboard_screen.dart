@@ -738,7 +738,7 @@ class DashboardScreen extends ConsumerWidget {
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
-                              Iconsax.arrow_down,
+                              Iconsax.arrow_down_1,
                               color: Colors.green,
                               size: 20,
                             ),

@@ -95,7 +95,7 @@ class _AddPengeluaranGajiScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Data pengeluaran gaji berhasil disimpan'),
+            content: Text('Data Pengeluaran Upah berhasil disimpan'),
             backgroundColor: Colors.green,
           ),
         );
@@ -460,7 +460,7 @@ class _AddPengeluaranGajiScreenState
                           children: [
                             Icon(Iconsax.save_2, size: 20),
                             SizedBox(width: 8),
-                            Text('Simpan Pengeluaran Gaji'),
+                            Text('Simpan Pengeluaran Upah'),
                           ],
                         ),
                 ),

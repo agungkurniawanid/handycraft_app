@@ -145,7 +145,7 @@ class _EditPengeluaranGajiState extends ConsumerState<EditPengeluaranGaji> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Data pengeluaran gaji berhasil diperbarui'),
+            content: Text('Data Pengeluaran Upah berhasil diperbarui'),
             backgroundColor: Colors.green,
           ),
         );
@@ -191,7 +191,7 @@ class _EditPengeluaranGajiState extends ConsumerState<EditPengeluaranGaji> {
     if (_existingData == null && _isInitialDataLoaded) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Edit Pengeluaran Gaji'),
+          title: const Text('Edit Pengeluaran Upah'),
           leading: IconButton(
             icon: const Icon(Iconsax.arrow_left_2),
             onPressed: () => Navigator.pop(context),
@@ -203,7 +203,7 @@ class _EditPengeluaranGajiState extends ConsumerState<EditPengeluaranGaji> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Pengeluaran Gaji'),
+        title: const Text('Edit Pengeluaran Upah'),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Iconsax.arrow_left_2),

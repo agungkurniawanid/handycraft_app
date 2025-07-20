@@ -34,7 +34,7 @@ class _DetailPenerimaanLainnyaState
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Detail Pengeluaran Lainnya'),
+        title: const Text('Detail Penerimaan Lainnya'),
         centerTitle: true,
       ),
       body: Column(
@@ -291,14 +291,14 @@ class _DetailPenerimaanLainnyaState
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.purple.withOpacity(
+                        color: Colors.blueAccent.withOpacity(
                           isDarkMode ? 0.3 : 0.1,
                         ),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
-                        Iconsax.receipt,
-                        color: Colors.purple,
+                        Iconsax.dollar_circle,
+                        color: Colors.blueAccent,
                         size: 20,
                       ),
                     ),
@@ -418,9 +418,9 @@ class _DetailPenerimaanLainnyaState
                       ),
                     ),
                     Text(
-                      '-$formattedAmount',
+                      '+$formattedAmount',
                       style: textTheme.bodyLarge?.copyWith(
-                        color: Colors.red,
+                        color: Colors.green,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

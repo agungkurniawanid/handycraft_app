@@ -70,19 +70,26 @@ class DashboardScreen extends ConsumerWidget {
     final DateTime? picked = await showDialog<DateTime>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Pilih Tahun'),
-          content: SizedBox(
-            width: 300,
-            height: 300,
-            child: YearPicker(
-              firstDate: DateTime(2000),
-              lastDate: DateTime(2100),
-              initialDate: initialDate,
-              selectedDate: initialDate,
-              onChanged: (DateTime dateTime) {
-                Navigator.pop(context, dateTime);
-              },
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Colors.orange, // Warna selected
+            ),
+          ),
+          child: AlertDialog(
+            title: const Text('Pilih Tahun'),
+            content: SizedBox(
+              width: 300,
+              height: 300,
+              child: YearPicker(
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2100),
+                initialDate: initialDate,
+                selectedDate: initialDate,
+                onChanged: (DateTime dateTime) {
+                  Navigator.pop(context, dateTime);
+                },
+              ),
             ),
           ),
         );
@@ -101,7 +108,7 @@ class DashboardScreen extends ConsumerWidget {
       case 2:
         return 'pengeluaran';
       case 3:
-        return 'pengeluaran gaji karyawan';
+        return 'Pengeluaran Upah karyawan';
       case 4:
         return 'pengeluaran lainnya';
       case 5:
@@ -1537,7 +1544,7 @@ class DashboardScreen extends ConsumerWidget {
                 _buildExpenseOptionCard(
                   context,
                   icon: Icons.people,
-                  title: 'Pengeluaran Gaji Karyawan',
+                  title: 'Pengeluaran Upah Karyawan',
                   subtitle: 'Catat pengeluaran untuk gaji karyawan',
                   onTap: () {
                     Navigator.pop(context);
@@ -1703,7 +1710,7 @@ class DashboardScreen extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  'Detail Pengeluaran Gaji',
+                  'Detail Pengeluaran Upah',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -1799,7 +1806,7 @@ class DashboardScreen extends ConsumerWidget {
           return const Center(
             child: Padding(
               padding: EdgeInsets.all(20.0),
-              child: Text('Belum ada data pengeluaran gaji.'),
+              child: Text('Belum ada data Pengeluaran Upah.'),
             ),
           );
         }
@@ -2901,15 +2908,18 @@ class DashboardScreen extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Batal',
-              style: TextStyle(
-                color: Theme.of(context).textTheme.bodyLarge?.color,
-              ),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
             ),
+            onPressed: () => Navigator.pop(context),
+            child: Text('Batal'),
           ),
           TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () {
               ref
                   .read(pengeluaranLainnyaRepositoryProvider)
@@ -2922,7 +2932,7 @@ class DashboardScreen extends ConsumerWidget {
                 ),
               );
             },
-            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+            child: const Text('Hapus'),
           ),
         ],
       ),

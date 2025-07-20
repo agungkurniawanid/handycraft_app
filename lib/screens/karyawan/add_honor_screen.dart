@@ -88,7 +88,7 @@ class _AddHonorScreenState extends State<AddHonorScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.honor == null ? 'Tambah Honor' : 'Edit Honor'),
+        title: Text(widget.honor == null ? 'Tambah Upah' : 'Edit Upah'),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Iconsax.arrow_left_2),
@@ -155,7 +155,7 @@ class _AddHonorScreenState extends State<AddHonorScreen> {
               TextFormField(
                 controller: _gajiController,
                 decoration: const InputDecoration(
-                  labelText: 'Gaji',
+                  labelText: 'Upah',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Iconsax.money),
                   prefixText: 'Rp ',
@@ -167,14 +167,14 @@ class _AddHonorScreenState extends State<AddHonorScreen> {
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Gaji tidak boleh kosong';
+                    return 'Upah tidak boleh kosong';
                   }
                   final parsedValue = double.tryParse(value);
                   if (parsedValue == null) {
                     return 'Masukkan angka yang valid';
                   }
                   if (parsedValue <= 0) {
-                    return 'Gaji harus lebih dari 0';
+                    return 'Upah harus lebih dari 0';
                   }
                   return null;
                 },
@@ -204,7 +204,7 @@ class _AddHonorScreenState extends State<AddHonorScreen> {
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Pilih satuan gaji';
+                    return 'Pilih satua upah';
                   }
                   return null;
                 },

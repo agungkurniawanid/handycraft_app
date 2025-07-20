@@ -108,7 +108,7 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
               Expanded(
                 child: filteredPengeluaranGaji.isEmpty
                     ? const Center(
-                        child: Text('Tidak ada data pengeluaran gaji'),
+                        child: Text('Tidak ada data Pengeluaran Upah'),
                       )
                     : ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -533,7 +533,7 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
                   ),
                 ),
                 Text(
-                  'Detail Pengeluaran Gaji',
+                  'Detail Pengeluaran Upah',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -625,7 +625,7 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).cardColor,
         title: Text(
-          'Hapus Pengeluaran Gaji',
+          'Hapus Pengeluaran Upah',
           style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
         ),
         content: Text(
@@ -650,7 +650,7 @@ class _DetailPengeluaranGajiState extends ConsumerState<DetailPengeluaranGaji> {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Data pengeluaran gaji berhasil dihapus'),
+                  content: Text('Data Pengeluaran Upah berhasil dihapus'),
                   backgroundColor: Colors.green,
                 ),
               );

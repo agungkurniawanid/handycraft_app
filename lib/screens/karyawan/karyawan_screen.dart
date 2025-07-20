@@ -67,12 +67,11 @@ class KaryawanScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
 
-            // Daftar Honor Section
             Padding(
               padding: const EdgeInsets.all(16),
               child: _buildSectionHeader(
                 context,
-                title: 'Daftar Honor',
+                title: 'Daftar Upah',
                 onAddPressed: () {
                   Navigator.push(
                     context,
@@ -218,7 +217,7 @@ class KaryawanScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 15),
             Text(
-              'Belum Ada Daftar Honor',
+              'Belum Ada Daftar  Upah',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: Colors.grey.shade700,
@@ -226,7 +225,7 @@ class KaryawanScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Tambahkan daftar honor baru untuk memulai',
+              'Tambahkan Daftar  Upah baru untuk memulai',
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade500),
@@ -391,7 +390,7 @@ class KaryawanScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Gaji: Rp${honor.gaji.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (match) => '${match[1]}.')}',
+              'Upah: Rp${honor.gaji.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (match) => '${match[1]}.')}',
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,

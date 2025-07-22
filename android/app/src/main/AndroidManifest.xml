@@ -4,7 +4,7 @@
 
 
     <application
-        android:label="HandyCraft App"
+        android:label="Rahmad HandyCraft App"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity

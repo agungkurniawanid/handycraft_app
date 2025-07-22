@@ -117,7 +117,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                   ),
                 ],
               ),
-              child: const Text('Rahmat HandyCraft'),
+              child: const Text('Rahmad HandyCraft App'),
             ),
             const SizedBox(height: 10),
             AnimatedOpacity(

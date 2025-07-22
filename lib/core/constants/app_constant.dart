@@ -1,5 +1,5 @@
 class AppConstants {
-  static const String appName = 'HandyCraft App';
+  static const String appName = 'Rahmad HandyCraft App';
 
   static const double mobileSmall = 600;
   static const double mobileLarge = 768;
